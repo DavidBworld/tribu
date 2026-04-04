@@ -171,6 +171,55 @@ body{background:var(--bg);color:var(--tx);overscroll-behavior:none;font-family:-
 .stock-low{border-left:3px solid var(--r);}
 .stock-ok{border-left:3px solid var(--g);}
 </style>
+<script>
+async function askGemini(question) {
+    try {
+        const response = await fetch('http://localhost:3000/api/gemini', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt: question })
+        });
+        const data = await response.json();
+        if (data.error) throw new Error(data.error);
+        return data.reply;
+    } catch (error) {
+        console.error(error);
+        return "Erreur de connexion au Cerveau.";
+    }
+}
+
+// Ajout d'un bouton magique dans la Cuisine
+window.addEventListener('DOMContentLoaded', () => {
+    // On cherche l'en-tête de la page Cuisine
+    const cuisineHeader = document.querySelector('#s-cuisine .hdr');
+    if(cuisineHeader) {
+        const btnIA = document.createElement('button');
+        btnIA.className = 'btn btn-sm';
+        btnIA.style.background = 'var(--v)'; // Couleur violette pour l'IA
+        btnIA.innerHTML = '<span class="ms" style="font-size:15px;">auto_awesome</span> Recette IA';
+        
+        btnIA.onclick = async () => {
+            const ingredients = prompt("🤖 L'IA est prête.\nQu'avez-vous dans le frigo ? (ex: 2 tomates, oeufs, reste de poulet)");
+            if(!ingredients) return;
+            
+            // Notification visuelle
+            const btnText = btnIA.innerHTML;
+            btnIA.innerHTML = '<span class="ms" style="font-size:15px;">hourglass_empty</span> Réflexion...';
+            
+            // Appel au Cerveau Gemini
+            const promptIA = `Tu es le chef cuisinier de Notre Tribu. Propose une recette simple, rapide et chaleureuse en utilisant uniquement ces ingrédients : ${ingredients}. Donne un titre sympa, le temps de préparation, et 3 étapes claires au format texte court.`;
+            const recette = await askGemini(promptIA);
+            
+            // Affichage du résultat
+            alert("👨‍🍳 PROPOSITION DE L'IA :\n\n" + recette);
+            btnIA.innerHTML = btnText; // Remettre le bouton normal
+        };
+        
+        // Ajouter le bouton à côté de l'autre
+        cuisineHeader.appendChild(btnIA);
+    }
+});
+</script>
 </head>
 <body>
 
@@ -618,7 +667,7 @@ body{background:var(--bg);color:var(--tx);overscroll-behavior:none;font-family:-
       <label style="display:flex;align-items:center;gap:5px;"><input type="checkbox" id="ev-m-chloe"/><span class="pill pill-g">Chloé</span></label>
     </div>
     <div style="display:flex;gap:10px;">
-      <button class="btn" onclick="createEvent()" style="flex:1;justify-content:center;"><span class="ms" style="font-size:16px;">check</span>Créer</button>
+      <button class="btn" onclick="saveNewEvent()" style="flex:1;justify-content:center;"><span class="ms" style="font-size:16px;">check</span>Créer</button>
       <button class="btn-ghost" onclick="toggleNewEventPanel()" style="flex:1;justify-content:center;">Annuler</button>
     </div>
   </div>
@@ -2441,27 +2490,46 @@ function openEventDetail(){
   showSheet('sheet-event-detail');
 }
 
+function openNewEvent(){ var p=document.getElementById('panel-new-event'); if(p){ p.style.display='block'; var t=document.getElementById('ev-title'); if(t){t.value='';t.focus();} } }
+
 function toggleNewEventPanel(){ var p=document.getElementById('panel-new-event'); if(p){ var open=p.style.display==='block'; p.style.display=open?'none':'block'; if(!open){ var t=document.getElementById('ev-title'); if(t){t.value='';t.focus();} } } }
 
-function createEvent(){
-  var title = document.getElementById('ev-title').value.trim();
+function saveNewEvent(){
+  var panel = document.getElementById('panel-new-event');
+  var modal = document.getElementById('m-new-event');
+  var c = (modal && modal.offsetParent !== null) ? modal : panel;
+  if (!c) c = document;
+
+  var titleEl = c.querySelector('#ev-title');
+  var title = titleEl ? titleEl.value.trim() : '';
   if(!title){ alert('Entrez un titre'); return; }
-  var day   = parseInt(document.getElementById('ev-day').value) || 1;
-  var month = parseInt(document.getElementById('ev-month').value) || 4;
-  var time  = document.getElementById('ev-time').value || '';
-  var addr  = document.getElementById('ev-addr').value || '';
-  var notes = document.getElementById('ev-notes').value || '';
+  
+  var dayEl = c.querySelector('#ev-day');
+  var day = dayEl ? parseInt(dayEl.value) || 1 : 1;
+  
+  var monthEl = c.querySelector('#ev-month');
+  var month = monthEl ? parseInt(monthEl.value) || 4 : 4;
+  
+  var timeEl = c.querySelector('#ev-time');
+  var time = timeEl ? timeEl.value || '' : '';
+  
+  var addrEl = c.querySelector('#ev-addr');
+  var addr = addrEl ? addrEl.value || '' : '';
+  
+  var notesEl = c.querySelector('#ev-notes');
+  var notes = notesEl ? notesEl.value || '' : '';
 
   var selMember = currentUser;
-  if(document.getElementById('ev-m-laetitia') && document.getElementById('ev-m-laetitia').checked) selMember='laetitia';
-  if(document.getElementById('ev-m-eva') && document.getElementById('ev-m-eva').checked) selMember='eva';
-  if(document.getElementById('ev-m-chloe') && document.getElementById('ev-m-chloe').checked) selMember='chloe';
-  if(document.getElementById('ev-m-david') && document.getElementById('ev-m-david').checked) selMember='david';
+  if(c.querySelector('#ev-m-laetitia') && c.querySelector('#ev-m-laetitia').checked) selMember='laetitia';
+  if(c.querySelector('#ev-m-eva') && c.querySelector('#ev-m-eva').checked) selMember='eva';
+  if(c.querySelector('#ev-m-chloe') && c.querySelector('#ev-m-chloe').checked) selMember='chloe';
+  if(c.querySelector('#ev-m-david') && c.querySelector('#ev-m-david').checked) selMember='david';
 
   calEvents.push({ day:day, month:month, year:2026, label:title+(time?' '+time:''), member:selMember, addr:addr, notes:notes });
 
-  var p=document.getElementById('panel-new-event');if(p)p.style.display='none';
-  document.getElementById('ev-title').value = '';
+  if(panel) panel.style.display='none';
+  if(modal) modal.style.display='none';
+  if(titleEl) titleEl.value = '';
 
   calOffset = (2026 - TODAY.getFullYear())*12 + (month - (TODAY.getMonth()+1));
   calView = 'mensuel';
