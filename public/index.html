@@ -22,7 +22,7 @@
   %22icons%22:[{%22src%22:%22data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%20512%20512%27%3E%3Crect%20width%3D%27512%27%20height%3D%27512%27%20rx%3D%27100%27%20fill%3D%27%23506071%27/%3E%3Ctext%20x%3D%27256%27%20y%3D%27340%27%20font-size%3D%27280%27%20text-anchor%3D%27middle%27%20fill%3D%27white%27%3E%F0%9F%8F%A0%3C/text%3E%3C/svg%3E%22,%22sizes%22:%22512x512%22,%22type%22:%22image/svg+xml%22,%22purpose%22:%22any%20maskable%22}]
 }"/>
 <!-- Apple touch icons -->
-<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='100' fill='%23506071'/><text x='256' y='340' font-size='280' text-anchor='middle' fill='white'>🏠</text></svg>"/>
+
 <title>Notre Tribu — Sanctuaire</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1" rel="stylesheet"/>
@@ -589,6 +589,13 @@ window.addEventListener('DOMContentLoaded', () => {
     <div class="card" style="display:flex;align-items:center;gap:10px;padding:10px 14px;margin-bottom:16px;">
       <span class="ms" style="color:var(--p);font-size:22px;">add_circle</span>
       <input id="new-item" placeholder="Ajouter un article…" style="flex:1;background:none;border:none;outline:none;font-size:14px;color:var(--tx);font-family:inherit;" onkeydown="if(event.key==='Enter')addItem()"/>
+      <select id="course-category" style="background:var(--s1);border:none;border-radius:8px;padding:6px;font-size:12px;color:var(--tx);outline:none;">
+        <option value="Sans catégorie">Sans catégorie</option>
+        <option value="Frais">Frais</option>
+        <option value="Boissons">Boissons</option>
+        <option value="Hygiène">Hygiène</option>
+        <option value="Épicerie">Épicerie</option>
+      </select>
       <button class="btn btn-sm" onclick="addItem()">Ajouter</button>
     </div>
     <!-- Count -->
@@ -598,46 +605,7 @@ window.addEventListener('DOMContentLoaded', () => {
     </div>
     <!-- Sections par rayon -->
     <div class="card" style="padding:16px;margin-bottom:18px;" id="shopping-list">
-      <!-- ÉPICERIE -->
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-        <span class="ms" style="font-size:16px;color:var(--tv);">storefront</span>
-        <span style="font-size:11px;font-weight:700;color:var(--tv);letter-spacing:.06em;text-transform:uppercase;">Épicerie</span>
-      </div>
-      <div id="active-items" style="display:flex;flex-direction:column;gap:0;margin-bottom:16px;"></div>
-      <!-- FRAIS -->
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;margin-top:8px;padding-top:12px;border-top:1px solid var(--s2);">
-        <span class="ms" style="font-size:16px;color:var(--tv);">ac_unit</span>
-        <span style="font-size:11px;font-weight:700;color:var(--tv);letter-spacing:.06em;text-transform:uppercase;">Frais</span>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:0;">
-        <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--s2);">
-          <div class="cc done"><span class="ms msf" style="font-size:13px;color:white;">check</span></div>
-          <div style="flex:1;"><p style="font-weight:600;font-size:14px;color:var(--olv);text-decoration:line-through;">Lait demi-écrémé</p><span style="font-size:10px;color:var(--to);">Coché par David</span></div>
-        </div>
-        <div style="display:flex;align-items:center;gap:12px;padding:12px 0;">
-          <div class="cc"></div>
-          <div style="flex:1;"><p style="font-weight:600;font-size:14px;">Yaourts nature × 8</p><span style="font-size:10px;color:var(--to);">Ajouté par Laëtitia</span></div>
-          <span class="pill pill-r" style="font-size:9px;">Urgent</span>
-        </div>
-      </div>
-      <!-- BOISSONS -->
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;margin-top:8px;padding-top:12px;border-top:1px solid var(--s2);">
-        <span class="ms" style="font-size:16px;color:var(--tv);">local_bar</span>
-        <span style="font-size:11px;font-weight:700;color:var(--tv);letter-spacing:.06em;text-transform:uppercase;">Boissons</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:12px;padding:12px 0;">
-        <div class="cc"></div>
-        <div style="flex:1;"><p style="font-weight:600;font-size:14px;">Eau minérale × 6</p><span style="font-size:10px;color:var(--to);">Ajouté par Chloé</span></div>
-      </div>
-      <!-- HYGIÈNE -->
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;margin-top:8px;padding-top:12px;border-top:1px solid var(--s2);">
-        <span class="ms" style="font-size:16px;color:var(--tv);">soap</span>
-        <span style="font-size:11px;font-weight:700;color:var(--tv);letter-spacing:.06em;text-transform:uppercase;">Hygiène</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:12px;padding:12px 0;">
-        <div class="cc"></div>
-        <div style="flex:1;"><p style="font-weight:600;font-size:14px;">Gel douche Eva</p><span style="font-size:10px;color:var(--to);">Ajouté par Eva</span></div>
-      </div>
+      <!-- Rempli dynamiquement -->
     </div>
     <!-- Validés -->
     <p style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--olv);margin-bottom:10px;padding:0 2px;">Validés récemment</p>
@@ -1903,9 +1871,12 @@ window.addEventListener('DOMContentLoaded', () => {
 <script>
 /* ─── STATE ──────────────────────────────────────────── */
 let shopping=[
-  {id:1,name:'Pain',by:'Chloé',done:false},
-  {id:2,name:'Tomates',by:'Laëtitia',done:false},
-  {id:3,name:'Fromage',by:'David',done:false},
+  {id:1,name:'Pain',by:'Chloé',done:false,rayon:'Épicerie'},
+  {id:2,name:'Tomates',by:'Laëtitia',done:false,rayon:'Frais'},
+  {id:3,name:'Fromage',by:'David',done:false,rayon:'Frais'},
+  {id:4,name:'Yaourts nature × 8',by:'Laëtitia',done:false,rayon:'Frais'},
+  {id:5,name:'Eau minérale × 6',by:'Chloé',done:false,rayon:'Boissons'},
+  {id:6,name:'Gel douche Eva',by:'Eva',done:false,rayon:'Hygiène'}
 ];
 const doneEx=[{id:99,name:'Lait',by:'David'}];
 
@@ -2228,20 +2199,63 @@ function renderCourses(){
   const rem=shopping.filter(i=>!i.done);
   const cnt=document.getElementById('item-count');
   if(cnt) cnt.textContent=rem.length+' article'+(rem.length!==1?'s':'');
-  const ai=document.getElementById('active-items');
-  if(ai) ai.innerHTML=rem.map((it,i)=>`
-    <div style="display:flex;align-items:center;gap:12px;padding:12px 0;${i<rem.length-1?'border-bottom:1px solid var(--s2)':''}" id="it-${it.id}">
-      <div class="cc" onclick="chkItem(${it.id})"></div>
-      <div style="flex:1;"><p style="font-weight:600;font-size:14px;">${it.name}</p><span style="font-size:10px;color:var(--to);">Ajouté par ${it.by}</span></div>
-    </div>`).join('');
+
+  const sl = document.getElementById('shopping-list');
+  if(sl){
+    if(rem.length === 0){
+      sl.innerHTML = '<p style="font-size:14px;color:var(--tv);padding:10px 0;">Aucun article à acheter.</p>';
+    } else {
+      const groups = {};
+      rem.forEach(it => {
+        const r = it.rayon || 'Sans catégorie';
+        if(!groups[r]) groups[r] = [];
+        groups[r].push(it);
+      });
+      const icons = {'Épicerie':'storefront','Frais':'ac_unit','Boissons':'local_bar','Hygiène':'soap','Sans catégorie':'category'};
+      let html = '';
+      Object.keys(groups).forEach((cat, idx) => {
+        const icon = icons[cat] || 'category';
+        html += `<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;${idx>0?'margin-top:8px;padding-top:12px;border-top:1px solid var(--s2);':''}">
+          <span class="ms" style="font-size:16px;color:var(--tv);">${icon}</span>
+          <span style="font-size:11px;font-weight:700;color:var(--tv);letter-spacing:.06em;text-transform:uppercase;">${cat}</span>
+        </div>`;
+        html += `<div style="display:flex;flex-direction:column;gap:0;margin-bottom:16px;">`;
+        groups[cat].forEach((it, i) => {
+          html += `<div style="display:flex;align-items:center;gap:12px;padding:12px 0;${i<groups[cat].length-1?'border-bottom:1px solid var(--s2)':''}" id="it-${it.id}">
+            <div class="cc" onclick="chkItem(${it.id})"></div>
+            <div style="flex:1;">
+              <p style="font-weight:600;font-size:14px;">${it.name}</p>
+              <span style="font-size:10px;color:var(--to);">Ajouté par ${it.by}</span>
+            </div>
+            <button onclick="deleteItem('${it.id}')" style="background:none;border:none;cursor:pointer;color:var(--r);padding:4px;"><span class="ms" style="font-size:18px;">delete</span></button>
+          </div>`;
+        });
+        html += `</div>`;
+      });
+      sl.innerHTML = html;
+    }
+  }
+
   const di=document.getElementById('done-items');
   if(di){
     const all=shopping.filter(i=>i.done).concat(doneEx);
     di.innerHTML=all.length===0?'<p style="font-size:13px;color:var(--olv);text-align:center;padding:8px;">Rien encore</p>':
-    all.map(it=>`<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;"><div class="cc done"><span class="ms msf" style="font-size:12px;color:white;">check</span></div><p style="font-size:13px;color:var(--olv);text-decoration:line-through;">${it.name}</p></div>`).join('');
+    all.map(it=>`<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+      <div class="cc done" onclick="chkItem(${it.id})"><span class="ms msf" style="font-size:12px;color:white;">check</span></div>
+      <p style="flex:1;font-size:13px;color:var(--olv);text-decoration:line-through;">${it.name}</p>
+      <button onclick="deleteItem('${it.id}')" style="background:none;border:none;cursor:pointer;color:var(--r);padding:4px;"><span class="ms" style="font-size:16px;">delete</span></button>
+    </div>`).join('');
   }
 }
 function chkItem(id){const it=shopping.find(i=>i.id===id);if(it){it.done=true;renderCourses();}}
+function deleteItem(id){
+  const strId = String(id);
+  const idx = shopping.findIndex(i=>String(i.id)===strId);
+  if(idx>-1) shopping.splice(idx, 1);
+  const exIdx = doneEx.findIndex(i=>String(i.id)===strId);
+  if (exIdx>-1) doneEx.splice(exIdx, 1);
+  renderCourses();
+}
 var currentShoppingRayon='Épicerie';
 var cartIngredients=[]; // ingredients from current recipe
 
@@ -2324,8 +2338,10 @@ function addSelectedToCart(){
 
 function addItem(){
   const inp=document.getElementById('new-item');
+  const catSel=document.getElementById('course-category');
   const v=inp.value.trim();if(!v)return;
-  shopping.push({id:Date.now(),name:v,by:members[currentUser]||'David',done:false,rayon:currentShoppingRayon||'Épicerie'});
+  const cat = catSel ? catSel.value : 'Sans catégorie';
+  shopping.push({id:Date.now(),name:v,by:members[currentUser]||'David',done:false,rayon:cat});
   inp.value='';renderCourses();
 }
 
