@@ -1727,7 +1727,7 @@ window.addEventListener('DOMContentLoaded', () => {
       <span class="ms" style="font-size:20px;">arrow_back</span>
     </button>
     <span style="font-size:17px;font-weight:800;">Nouvel événement</span>
-    <button onclick="createEvent()" class="btn btn-sm" style="touch-action:manipulation;">
+    <button onclick="saveNewEvent()" class="btn btn-sm" style="touch-action:manipulation;">
       <span class="ms" style="font-size:15px;">check</span>Créer
     </button>
   </div>
@@ -1755,7 +1755,7 @@ window.addEventListener('DOMContentLoaded', () => {
         <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" id="ev-m-chloe"/><span class="pill pill-g">Chloé</span></label>
       </div>
     </div>
-    <button onclick="createEvent()" class="btn" style="width:100%;justify-content:center;touch-action:manipulation;">
+    <button onclick="saveNewEvent()" class="btn" style="width:100%;justify-content:center;touch-action:manipulation;">
       <span class="ms" style="font-size:17px;">event</span>Créer l'événement
     </button>
   </div>
@@ -1870,15 +1870,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
 <script>
 /* ─── STATE ──────────────────────────────────────────── */
-let shopping=[
-  {id:1,name:'Pain',by:'Chloé',done:false,rayon:'Épicerie'},
-  {id:2,name:'Tomates',by:'Laëtitia',done:false,rayon:'Frais'},
-  {id:3,name:'Fromage',by:'David',done:false,rayon:'Frais'},
-  {id:4,name:'Yaourts nature × 8',by:'Laëtitia',done:false,rayon:'Frais'},
-  {id:5,name:'Eau minérale × 6',by:'Chloé',done:false,rayon:'Boissons'},
-  {id:6,name:'Gel douche Eva',by:'Eva',done:false,rayon:'Hygiène'}
-];
-const doneEx=[{id:99,name:'Lait',by:'David'}];
+let shopping=[];
+let doneEx=[];
 
 /* ─── CLOCK ──────────────────────────────────────────── */
 function updateClock(){const n=new Date();const h=String(n.getHours()).padStart(2,'0');const m=String(n.getMinutes()).padStart(2,'0');const el=document.getElementById('clock');if(el)el.textContent=h+':'+m;}
@@ -2247,7 +2240,7 @@ function renderCourses(){
     </div>`).join('');
   }
 }
-function chkItem(id){const it=shopping.find(i=>i.id===id);if(it){it.done=true;renderCourses();}}
+function chkItem(id){const it=shopping.find(i=>i.id===id);if(it){it.done=true;renderCourses();saveServerData();}}
 function deleteItem(id){
   const strId = String(id);
   const idx = shopping.findIndex(i=>String(i.id)===strId);
@@ -2255,6 +2248,7 @@ function deleteItem(id){
   const exIdx = doneEx.findIndex(i=>String(i.id)===strId);
   if (exIdx>-1) doneEx.splice(exIdx, 1);
   renderCourses();
+  saveServerData();
 }
 var currentShoppingRayon='Épicerie';
 var cartIngredients=[]; // ingredients from current recipe
@@ -2333,6 +2327,7 @@ function addSelectedToCart(){
   });
   closeModal('m-add-to-cart');
   renderCourses();
+  saveServerData();
   showToast(sel.length+' article'+(sel.length>1?'s':'')+' ajoute'+(sel.length>1?'s':'')+'aux courses !');
 }
 
@@ -2342,7 +2337,7 @@ function addItem(){
   const v=inp.value.trim();if(!v)return;
   const cat = catSel ? catSel.value : 'Sans catégorie';
   shopping.push({id:Date.now(),name:v,by:members[currentUser]||'David',done:false,rayon:cat});
-  inp.value='';renderCourses();
+  inp.value='';renderCourses();saveServerData();
 }
 
 /* ─── MODALS ─────────────────────────────────────────── */
@@ -2490,17 +2485,33 @@ const DAYS=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
 const MONTHS=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 
 // Events data (member key matches memberColors)
-const calEvents=[
-  {day:23,month:3,year:2026,label:'Foot 18h',member:'david'},
-  {day:24,month:3,year:2026,label:'Danse 17h',member:'eva'},
-  {day:25,month:3,year:2026,label:'Piscine 14h',member:'chloe'},
-  {day:27,month:3,year:2026,label:'Dîner 20h',member:'laetitia'},
-  {day:2,month:4,year:2026,label:'Foot 18h30',member:'david'},
-  {day:4,month:4,year:2026,label:'Anniv. Chloé',member:'chloe'},
-  {day:10,month:4,year:2026,label:'Danse 19h',member:'eva'},
-  {day:15,month:4,year:2026,label:'Rdv médecin',member:'laetitia'},
-  {day:20,month:4,year:2026,label:'Réunion parents',member:'david'},
-];
+let calEvents=[];
+
+function saveServerData() {
+    fetch('/api/data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ shopping, doneEx, calEvents })
+    }).catch(e => console.error(e));
+}
+
+async function loadServerData() {
+    try {
+        const res = await fetch('/api/data', { cache: 'no-store' });
+        if(res.ok) {
+            const data = await res.json();
+            shopping = data.shopping || [];
+            doneEx = data.doneEx || [];
+            calEvents = data.calEvents || [];
+        }
+    } catch(e) {
+        console.error("Load data error", e);
+    }
+    renderCourses();
+    renderCalendar();
+}
+
+window.addEventListener('DOMContentLoaded', loadServerData);
 
 function openEventDetail(){
   showSheet('sheet-event-detail');
@@ -2550,6 +2561,7 @@ function saveNewEvent(){
   calOffset = (2026 - TODAY.getFullYear())*12 + (month - (TODAY.getMonth()+1));
   calView = 'mensuel';
   renderCalendar();
+  saveServerData();
   showToast('Événement ajouté !');
 }
 
