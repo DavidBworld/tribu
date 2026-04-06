@@ -2488,10 +2488,11 @@ const MONTHS=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août'
 let calEvents=[];
 
 function saveServerData() {
+    console.log('Payload sent:', { shopping, recipeStore });
     fetch('/api/data', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ shopping, doneEx, calEvents })
+        body: JSON.stringify({ shopping, doneEx, calEvents, recipeStore })
     }).catch(e => console.error(e));
 }
 
@@ -2503,12 +2504,19 @@ async function loadServerData() {
             shopping = data.shopping || [];
             doneEx = data.doneEx || [];
             calEvents = data.calEvents || [];
+            recipeStore = data.recipeStore || [];
+            if(recipeStore.length > 0) {
+                var maxRId = 0;
+                recipeStore.forEach(function(r){ if(r.id > maxRId) maxRId = r.id; });
+                recipeStoreId = maxRId;
+            }
         }
     } catch(e) {
         console.error("Load data error", e);
     }
     renderCourses();
     renderCalendar();
+    renderRecipeList();
 }
 
 window.addEventListener('DOMContentLoaded', loadServerData);
@@ -3708,6 +3716,7 @@ function renderRecipeList(){
 function deleteRecipe(id){
   recipeStore=recipeStore.filter(function(r){return r.id!==id;});
   renderRecipeList();
+  saveServerData();
   showToast('Recette supprimee');
 }
 
@@ -3737,12 +3746,12 @@ function openRecipeDetail(id){
   // Ingredients
   var ingsHtml='';
   if(r.ingredients&&r.ingredients.length){
-    ingsHtml='<div class="card" style="padding:16px;margin-bottom:20px;">'
+    ingsHtml='<div id="recipe-detail-ings" class="card" style="padding:16px;margin-bottom:20px;">'
       +r.ingredients.map(function(ing,i){
         var qty=ing.qty&&ing.qty!==''?ing.qty+' ':'';
         var unit=ing.unit&&ing.unit!==''?ing.unit+' ':'';
         var label=(qty+unit+ing.name).trim();
-        return '<div onclick="checkIng(this)" data-checked="0" style="display:flex;align-items:center;gap:12px;padding:12px 0;'+(i<r.ingredients.length-1?'border-bottom:1px solid var(--s2)':'')+';cursor:pointer;">'
+        return '<div onclick="checkIng(this)" data-checked="0" data-name="'+escHtml(label.trim())+'" style="display:flex;align-items:center;gap:12px;padding:12px 0;'+(i<r.ingredients.length-1?'border-bottom:1px solid var(--s2)':'')+';cursor:pointer;">'
           +'<div style="width:22px;height:22px;border-radius:6px;border:2px solid var(--olv);flex-shrink:0;display:flex;align-items:center;justify-content:center;"></div>'
           +'<span style="font-size:14px;">'+escHtml(label.trim())+'</span></div>';
       }).join('')
@@ -3786,10 +3795,36 @@ function openRecipeDetail(id){
     // Steps
     +(stepsHtml?'<h2 style="font-size:18px;font-weight:800;margin-bottom:16px;display:flex;align-items:center;gap:8px;"><span class="ms" style="color:var(--p);">format_list_numbered</span>Étapes</h2>'+stepsHtml:'')
     // Add to cart
-    +'<button onclick="openAddToCartSheet('+r.id+')" class="btn btn-r" style="width:100%;justify-content:center;margin-top:8px;padding:14px;"><span class="ms msf" style="font-size:18px;">shopping_cart</span>Ajouter aux courses</button>'
+    +'<button onclick="addCheckedIngredientsToCart()" class="btn btn-r" style="width:100%;justify-content:center;margin-top:8px;padding:14px;"><span class="ms msf" style="font-size:18px;">shopping_cart</span>Ajouter aux courses</button>'
     +'</div>';
 
   openModal('m-recipe-detail');
+}
+
+function addCheckedIngredientsToCart() {
+    var container = document.getElementById('recipe-detail-ings');
+    if(!container) return;
+    var checked = container.querySelectorAll('div[data-checked="1"]');
+    if(checked.length === 0) {
+        showToast('Veuillez cocher au moins un ingrédient');
+        return;
+    }
+    checked.forEach(function(el, index) {
+        var name = el.getAttribute('data-name');
+        if(name) {
+            shopping.push({
+                id: Date.now() + index,
+                name: name,
+                by: members[currentUser] || 'David',
+                done: false,
+                rayon: 'Épicerie'
+            });
+        }
+    });
+    closeModal('m-recipe-detail');
+    renderCourses();
+    navigate('courses');
+    saveServerData();
 }
 
 /* ─── RECIPE EDITOR ──────────────────────────────────── */
@@ -4087,6 +4122,7 @@ function saveNewRecipe(){
   }
   currentEditingRecipeId=null;
   renderRecipeList();
+  saveServerData();
   closeModal('m-new-recipe');
 }
 

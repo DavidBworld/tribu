@@ -8,7 +8,8 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(express.static(path.join(__dirname, '../public')));
 
 const fs = require('fs').promises;
@@ -26,6 +27,7 @@ app.get('/api/data', async (req, res) => {
 
 app.post('/api/data', async (req, res) => {
     try {
+        console.log('Data received by server:', req.body);
         await fs.writeFile(dbPath, JSON.stringify(req.body, null, 2));
         res.json({ success: true });
     } catch (e) {
