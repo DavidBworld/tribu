@@ -4136,7 +4136,7 @@ function showToast(msg){
   if(!t){
     t=document.createElement('div');
     t.id='app-toast';
-    t.style.cssText='position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#31332c;color:white;padding:12px 20px;border-radius:99px;font-size:13px;font-weight:600;z-index:9999;opacity:0;transition:opacity .25s;white-space:nowrap;box-shadow:0 8px 24px rgba(49,51,44,.25);';
+    t.style.cssText='position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#31332c;color:white;padding:12px 20px;border-radius:99px;font-size:13px;font-weight:600;z-index:9999;opacity:0;pointer-events:none;transition:opacity .25s;white-space:nowrap;box-shadow:0 8px 24px rgba(49,51,44,.25);';
     document.body.appendChild(t);
   }
   t.textContent=msg;
