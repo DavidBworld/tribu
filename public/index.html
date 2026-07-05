@@ -487,7 +487,7 @@ window.addEventListener('DOMContentLoaded', () => {
 </div>
 
 <!-- FAB calendrier -->
-<button id="fab-new-event" onclick="toggleNewEventPanel()" style="display:none;position:fixed;bottom:96px;right:20px;z-index:200;background:var(--p);color:white;border:none;border-radius:99px;padding:14px 20px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;box-shadow:0 8px 24px rgba(80,96,113,.4);display:flex;align-items:center;gap:8px;touch-action:manipulation;"><span class="ms" style="font-size:20px;">add</span>Événement</button>
+<button id="fab-new-event" onclick="openNewEvent()" style="display:none;position:fixed;bottom:96px;right:20px;z-index:200;background:var(--p);color:white;border:none;border-radius:99px;padding:14px 20px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;box-shadow:0 8px 24px rgba(80,96,113,.4);display:flex;align-items:center;gap:8px;touch-action:manipulation;"><span class="ms" style="font-size:20px;">add</span>Événement</button>
 
 <!-- ═══ CUISINE ═══════════════════════════════════════════ -->
 <div id="s-cuisine" class="scr" style="padding-bottom:88px;">
@@ -619,26 +619,6 @@ window.addEventListener('DOMContentLoaded', () => {
     <span style="font-size:20px;font-weight:800;letter-spacing:-.5px;">Calendrier</span>
     <div style="width:38px;"></div>
   </div>
-  <!-- ── PANNEAU NOUVEL ÉVÉNEMENT ── -->
-  <div id="panel-new-event" style="display:none;background:var(--s0);border-bottom:1px solid var(--s2);padding:16px 18px;">
-    <input class="input-field" id="ev-title" placeholder="Titre de l'événement" type="text" style="margin-bottom:10px;"/>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px;">
-      <select id="ev-day" class="input-field"><option>1</option><option>2</option><option>3</option><option selected>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option><option>24</option><option>25</option><option>26</option><option>27</option><option>28</option><option>29</option><option>30</option><option>31</option></select>
-      <select id="ev-month" class="input-field"><option value="1">Jan</option><option value="2">Fév</option><option value="3">Mar</option><option value="4" selected>Avr</option><option value="5">Mai</option><option value="6">Jun</option><option value="7">Jul</option><option value="8">Aoû</option><option value="9">Sep</option><option value="10">Oct</option><option value="11">Nov</option><option value="12">Déc</option></select>
-      <input type="time" id="ev-time" class="input-field" value="18:00"/>
-    </div>
-    <input class="input-field" id="ev-addr" placeholder="Lieu (optionnel)" type="text" style="margin-bottom:10px;"/>
-    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
-      <label style="display:flex;align-items:center;gap:5px;"><input type="checkbox" id="ev-m-david" checked/><span class="pill pill-p">David</span></label>
-      <label style="display:flex;align-items:center;gap:5px;"><input type="checkbox" id="ev-m-laetitia"/><span class="pill pill-r">Laëtitia</span></label>
-      <label style="display:flex;align-items:center;gap:5px;"><input type="checkbox" id="ev-m-eva"/><span class="pill pill-v">Eva</span></label>
-      <label style="display:flex;align-items:center;gap:5px;"><input type="checkbox" id="ev-m-chloe"/><span class="pill pill-g">Chloé</span></label>
-    </div>
-    <div style="display:flex;gap:10px;">
-      <button class="btn" onclick="saveNewEvent()" style="flex:1;justify-content:center;"><span class="ms" style="font-size:16px;">check</span>Créer</button>
-      <button class="btn-ghost" onclick="toggleNewEventPanel()" style="flex:1;justify-content:center;">Annuler</button>
-    </div>
-  </div>
   <div style="padding:0 16px;max-width:640px;margin:0 auto;">
     <!-- Header navigation + toggle -->
     <div style="display:flex;justify-content:space-between;align-items:center;margin:14px 0 14px;">
@@ -665,7 +645,7 @@ window.addEventListener('DOMContentLoaded', () => {
     </div>
     <!-- Upcoming events -->
     <h3 style="font-size:16px;font-weight:700;margin-bottom:12px;">Événements à venir</h3>
-    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px;">
+    <div id="upcoming-events-list" style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px;">
       <div class="card" style="display:flex;gap:14px;align-items:center;padding:16px;cursor:pointer;" onclick="openEventDetail()">
         <div style="width:52px;height:52px;border-radius:12px;background:var(--gc);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">🎂</div>
         <div style="flex:1;">
@@ -1724,26 +1704,52 @@ window.addEventListener('DOMContentLoaded', () => {
 
 <div id="m-new-event" class="modal" style="z-index:600;background:var(--bg);">
   <div style="padding:16px 18px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--s2);z-index:10;">
-    <button onclick="closeModal('m-new-event')" style="width:38px;height:38px;border-radius:99px;background:var(--s1);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;touch-action:manipulation;">
+    <button onclick="closeModal('m-new-event');resetEventForm()" style="width:38px;height:38px;border-radius:99px;background:var(--s1);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;touch-action:manipulation;">
       <span class="ms" style="font-size:20px;">arrow_back</span>
     </button>
-    <span style="font-size:17px;font-weight:800;">Nouvel événement</span>
+    <span style="font-size:17px;font-weight:800;">Nouveau</span>
     <button onclick="saveNewEvent()" class="btn btn-sm" style="touch-action:manipulation;">
-      <span class="ms" style="font-size:15px;">check</span>Créer
+      <span class="ms" style="font-size:15px;">check</span><span id="btn-save-event-header-text">Créer</span>
     </button>
   </div>
   <div style="padding:20px 18px 100px;display:flex;flex-direction:column;gap:14px;">
+    <!-- Bascule Jour entier -->
+    <div style="display:flex;align-items:center;justify-content:space-between;background:var(--s1);padding:10px 14px;border-radius:12px;margin-bottom:6px;">
+      <span style="font-size:13px;font-weight:700;color:var(--tx);">Jour entier</span>
+      <label style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer;">
+        <input type="checkbox" id="ev-allday" onchange="toggleTimeFields(this.checked)" style="opacity:0;width:0;height:0;position:absolute;"/>
+        <span id="ev-allday-slider" style="position:absolute;top:0;left:0;right:0;bottom:0;background-color:var(--s2);transition:.3s;border-radius:24px;display:flex;align-items:center;padding:0 3px;">
+          <span id="ev-allday-knob" style="width:18px;height:18px;border-radius:50%;background-color:white;transition:.3s;transform:translateX(0);"></span>
+        </span>
+      </label>
+    </div>
+    
     <input class="input-field" id="ev-title" placeholder="Titre de l'événement" type="text"/>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+    
+    <!-- Ligne Date -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
       <select id="ev-day" class="input-field">
         <option>1</option><option>2</option><option>3</option><option selected>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option><option>24</option><option>25</option><option>26</option><option>27</option><option>28</option><option>29</option><option>30</option><option>31</option>
       </select>
       <select id="ev-month" class="input-field">
         <option value="1">Jan</option><option value="2">Fév</option><option value="3">Mar</option><option value="4" selected>Avr</option><option value="5">Mai</option><option value="6">Jun</option><option value="7">Jul</option><option value="8">Aoû</option><option value="9">Sep</option><option value="10">Oct</option><option value="11">Nov</option><option value="12">Déc</option>
       </select>
-      <input type="time" id="ev-time" class="input-field" value="18:00"/>
     </div>
+    
+    <!-- Ligne Heures -->
+    <div id="ev-time-row" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:center;">
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span style="font-size:11px;font-weight:700;color:var(--tv);text-transform:uppercase;">Début</span>
+        <input type="time" id="ev-time" class="input-field" value="18:00" style="flex:1;"/>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span style="font-size:11px;font-weight:700;color:var(--tv);text-transform:uppercase;">Fin</span>
+        <input type="time" id="ev-end-time" class="input-field" placeholder="--:--" style="flex:1;"/>
+      </div>
+    </div>
+    
     <input class="input-field" id="ev-addr" placeholder="Lieu, adresse…" type="text"/>
+    <input class="input-field" id="ev-phone" placeholder="Téléphone (optionnel)" type="tel"/>
     <textarea class="input-field" id="ev-notes" placeholder="Notes…" style="height:80px;resize:none;"></textarea>
     <div>
       <p style="font-size:12px;font-weight:700;color:var(--tv);margin-bottom:8px;text-transform:uppercase;">Membres concernés</p>
@@ -1755,7 +1761,7 @@ window.addEventListener('DOMContentLoaded', () => {
       </div>
     </div>
     <button onclick="saveNewEvent()" class="btn" style="width:100%;justify-content:center;touch-action:manipulation;">
-      <span class="ms" style="font-size:17px;">event</span>Créer l'événement
+      <span class="ms" style="font-size:17px;">event</span><span id="btn-save-event-bottom-text">Créer l'événement</span>
     </button>
   </div>
 </div>
@@ -1766,11 +1772,14 @@ window.addEventListener('DOMContentLoaded', () => {
   <div class="sheet" onclick="event.stopPropagation()" style="max-height:92vh;overflow-y:auto;">
     <div class="handle"></div>
     <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;">
-      <div style="width:56px;height:56px;border-radius:14px;background:var(--gc);display:flex;align-items:center;justify-content:center;font-size:28px;">🎂</div>
-      <div><h3 style="font-size:20px;font-weight:800;">Anniversaire de Chloé</h3><p style="font-size:14px;color:var(--tv);">Samedi 4 Avril 2026</p></div>
+      <div id="detail-emoji" style="width:56px;height:56px;border-radius:14px;background:var(--gc);display:flex;align-items:center;justify-content:center;font-size:28px;">🎂</div>
+      <div>
+        <h3 id="detail-title" style="font-size:20px;font-weight:800;">Anniversaire de Chloé</h3>
+        <p id="detail-date" style="font-size:14px;color:var(--tv);">Samedi 4 Avril 2026</p>
+      </div>
     </div>
     <!-- Infos -->
-    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px;">
+    <div id="detail-info-container" style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px;">
       <div style="display:flex;align-items:center;gap:10px;">
         <span class="ms" style="font-size:20px;color:var(--tv);">schedule</span>
         <span style="font-size:14px;">14h00 — 18h30</span>
@@ -1787,20 +1796,16 @@ window.addEventListener('DOMContentLoaded', () => {
         <span class="ms" style="font-size:20px;color:var(--tv);">phone</span>
         <a href="tel:+33612345678" style="font-size:14px;color:var(--tx);text-decoration:none;">+33 6 12 34 56 78</a>
       </div>
-      <div style="display:flex;align-items:center;gap:10px;">
-        <span class="ms" style="font-size:20px;color:var(--tv);">mail</span>
-        <a href="mailto:chloe@notretribu.fr" style="font-size:14px;color:var(--tx);text-decoration:none;">chloe@notretribu.fr</a>
-      </div>
     </div>
     <!-- Map -->
     <div id="detail-event-map" style="margin-bottom:14px;"></div>
     <!-- Notes -->
     <div style="background:var(--s1);border-radius:12px;padding:14px;margin-bottom:18px;">
       <p style="font-size:10px;font-weight:700;color:var(--tv);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;">Observations</p>
-      <p style="font-size:13px;color:var(--tx);line-height:1.55;">Gâteau commandé chez le pâtissier. Prévoir des guirlandes. Les parents peuvent se garer rue des Acacias.</p>
+      <p id="detail-notes-text" style="font-size:13px;color:var(--tx);line-height:1.55;">Gâteau commandé chez le pâtissier. Prévoir des guirlandes. Les parents peuvent se garer rue des Acacias.</p>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-      <button class="btn-ghost" onclick="closeSheet('sheet-event-detail')" style="justify-content:center;display:flex;align-items:center;gap:6px;"><span class="ms" style="font-size:16px;">edit</span>Modifier</button>
+      <button class="btn-ghost" onclick="openEditEvent(currentDetailEventIndex)" style="justify-content:center;display:flex;align-items:center;gap:6px;"><span class="ms" style="font-size:16px;">edit</span>Modifier</button>
       <button class="btn" onclick="closeSheet('sheet-event-detail')" style="justify-content:center;"><span class="ms" style="font-size:16px;">check</span>Confirmé</button>
     </div>
   </div>
@@ -2520,86 +2525,346 @@ async function loadServerData() {
 
 window.addEventListener('DOMContentLoaded', loadServerData);
 
-function openEventDetail(){
+function getEventEmoji(label) {
+  var l = label.toLowerCase();
+  if (l.indexOf('anniv') !== -1 || l.indexOf('birth') !== -1 || l.indexOf('🎂') !== -1) return '🎂';
+  if (l.indexOf('foot') !== -1 || l.indexOf('match') !== -1 || l.indexOf('sport') !== -1 || l.indexOf('⚽') !== -1) return '⚽';
+  if (l.indexOf('danse') !== -1 || l.indexOf('spectacle') !== -1 || l.indexOf('🩰') !== -1) return '🩰';
+  if (l.indexOf('course') !== -1 || l.indexOf('achat') !== -1) return '🛒';
+  if (l.indexOf('repas') !== -1 || l.indexOf('dîner') !== -1 || l.indexOf('dejeuner') !== -1 || l.indexOf('resto') !== -1) return '🍳';
+  if (l.indexOf('doc') !== -1 || l.indexOf('médicin') !== -1 || l.indexOf('sante') !== -1 || l.indexOf('rdv') !== -1) return '🩺';
+  return '📅';
+}
+
+function renderUpcomingEvents() {
+  var container = document.getElementById('upcoming-events-list');
+  if(!container) return;
+
+  var sorted = calEvents.slice().sort(function(a,b){
+    var da = new Date(a.year || 2026, (a.month || 1) - 1, a.day || 1);
+    var db = new Date(b.year || 2026, (b.month || 1) - 1, b.day || 1);
+    return da - db;
+  });
+
+  var todayNoTime = new Date(TODAY.getFullYear(), TODAY.getMonth(), TODAY.getDate());
+  var upcoming = sorted.filter(function(ev){
+    var d = new Date(ev.year || 2026, (ev.month || 1) - 1, ev.day || 1);
+    return d >= todayNoTime;
+  }).slice(0, 3);
+
+  if (upcoming.length === 0) {
+    container.innerHTML = '<p style="font-size:13px;color:var(--tv);text-align:center;padding:10px 0;">Aucun événement à venir</p>';
+    return;
+  }
+
+  var html = '';
+  upcoming.forEach(function(ev){
+    var evIdx = calEvents.indexOf(ev);
+    var col = memberColors[ev.member] || '#888';
+    var bgStyle = (ev.member === 'david' ? 'var(--pc)' : (ev.member === 'laetitia' ? 'var(--rc)' : (ev.member === 'eva' ? 'var(--vc)' : 'var(--gc)')));
+    var emoji = getEventEmoji(ev.label);
+    
+    // Format Date
+    var monthNamesShort = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
+    var dateStr = ev.day + ' ' + monthNamesShort[(ev.month || 1) - 1];
+    
+    // Time/Location description
+    var desc = dateStr;
+    if (ev.time) desc += ' · ' + ev.time;
+    if (ev.addr) desc += ' · ' + ev.addr;
+
+    html += '<div class="card" style="display:flex;gap:14px;align-items:center;padding:16px;cursor:pointer;" onclick="openEventDetail(' + evIdx + ')">';
+    html += '  <div style="width:52px;height:52px;border-radius:12px;background:' + bgStyle + ';display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">' + emoji + '</div>';
+    html += '  <div style="flex:1;">';
+    html += '    <h4 style="font-size:15px;font-weight:700;margin-bottom:2px;">' + ev.label + '</h4>';
+    html += '    <p style="font-size:12px;color:var(--tv);">' + desc + '</p>';
+    html += '    <div style="display:flex;gap:6px;margin-top:6px;"><span class="pill pill-' + (ev.member === 'david' ? 'p' : (ev.member === 'laetitia' ? 'r' : (ev.member === 'eva' ? 'v' : 'g'))) + '">' + members[ev.member] + '</span></div>';
+    html += '  </div>';
+    html += '  <span class="ms" style="font-size:18px;color:var(--olv);">chevron_right</span>';
+    html += '</div>';
+  });
+
+  container.innerHTML = html;
+}
+
+function toggleTimeFields(checked) {
+  var timeRow = document.getElementById('ev-time-row');
+  var knob = document.getElementById('ev-allday-knob');
+  var slider = document.getElementById('ev-allday-slider');
+  if(timeRow) timeRow.style.display = checked ? 'none' : 'grid';
+  if(knob) knob.style.transform = checked ? 'translateX(20px)' : 'translateX(0)';
+  if(slider) slider.style.backgroundColor = checked ? 'var(--p)' : 'var(--s2)';
+}
+
+function resetEventForm() {
+  editingEventIndex = -1;
+  var m = document.getElementById('m-new-event');
+  if(!m) return;
+  
+  var titleEl = m.querySelector('#ev-title');
+  var dayEl = m.querySelector('#ev-day');
+  var monthEl = m.querySelector('#ev-month');
+  var timeEl = m.querySelector('#ev-time');
+  var endTimeEl = m.querySelector('#ev-end-time');
+  var phoneEl = m.querySelector('#ev-phone');
+  var addrEl = m.querySelector('#ev-addr');
+  var notesEl = m.querySelector('#ev-notes');
+  var alldayEl = m.querySelector('#ev-allday');
+  
+  if (titleEl) titleEl.value = '';
+  if (dayEl) dayEl.value = String(TODAY.getDate());
+  if (monthEl) monthEl.value = String(TODAY.getMonth() + 1);
+  if (timeEl) timeEl.value = '18:00';
+  if (endTimeEl) endTimeEl.value = '';
+  if (phoneEl) phoneEl.value = '';
+  if (addrEl) addrEl.value = '';
+  if (notesEl) notesEl.value = '';
+  
+  if (alldayEl) {
+    alldayEl.checked = false;
+    toggleTimeFields(false);
+  }
+  
+  var membersList = ['david', 'laetitia', 'eva', 'chloe'];
+  membersList.forEach(function(mKey){
+    var chk = m.querySelector('#ev-m-' + mKey);
+    if(chk) {
+      chk.checked = (mKey === currentUser);
+    }
+  });
+
+  var headerText = document.getElementById('btn-save-event-header-text');
+  var bottomText = document.getElementById('btn-save-event-bottom-text');
+  if(headerText) headerText.textContent = 'Créer';
+  if(bottomText) bottomText.textContent = "Créer l'événement";
+}
+
+function openEventDetail(idx){
+  currentDetailEventIndex = idx;
+  var ev = calEvents[idx];
+  if(!ev) return;
+  var sheet = document.getElementById('sheet-event-detail');
+  if(!sheet) return;
+  
+  var emojiEl = document.getElementById('detail-emoji');
+  if(emojiEl) emojiEl.textContent = getEventEmoji(ev.label);
+  
+  var titleEl = document.getElementById('detail-title');
+  if(titleEl) titleEl.textContent = ev.label;
+  
+  var dateEl = document.getElementById('detail-date');
+  if(dateEl){
+    var jsDate = new Date(ev.year || 2026, (ev.month || 1) - 1, ev.day || 1);
+    var dayNames = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+    var monthNames = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+    dateEl.textContent = dayNames[jsDate.getDay()] + ' ' + ev.day + ' ' + monthNames[jsDate.getMonth()] + ' ' + (ev.year || 2026);
+  }
+  
+  var infoContainer = document.getElementById('detail-info-container');
+  if(infoContainer){
+    infoContainer.innerHTML = '';
+    
+    // Heures
+    var timeHtml = ev.time ? (ev.time + (ev.endTime ? ' — ' + ev.endTime : '')) : 'Toute la journée';
+    infoContainer.innerHTML += '<div style="display:flex;align-items:center;gap:10px;"><span class="ms" style="font-size:20px;color:var(--tv);">schedule</span><span style="font-size:14px;">' + timeHtml + '</span></div>';
+    
+    // Adresse
+    if(ev.addr && ev.addr.trim() !== ''){
+      var mapUrl = 'https://maps.google.com/?q=' + encodeURIComponent(ev.addr.trim());
+      infoContainer.innerHTML += '<div style="display:flex;align-items:center;gap:10px;cursor:pointer;" onclick="window.open(\'' + mapUrl + '\',\'_blank\')"><span class="ms" style="font-size:20px;color:var(--p);">location_on</span><span style="font-size:14px;color:var(--p);font-weight:600;text-decoration:underline;">' + ev.addr + '</span></div>';
+    }
+    
+    // Membre concerné
+    var col = memberColors[ev.member] || '#888';
+    var memberLabel = members[ev.member] || ev.member;
+    infoContainer.innerHTML += '<div style="display:flex;align-items:center;gap:10px;"><span class="ms" style="font-size:20px;color:var(--tv);">group</span><span style="font-size:14px;display:flex;gap:6px;align-items:center;">Concerne : <span class="pill pill-' + (ev.member === 'david' ? 'p' : (ev.member === 'laetitia' ? 'r' : (ev.member === 'eva' ? 'v' : 'g'))) + '">' + memberLabel + '</span></span></div>';
+    
+    // Téléphone
+    if(ev.phone && ev.phone.trim() !== ''){
+      infoContainer.innerHTML += '<div style="display:flex;align-items:center;gap:10px;"><span class="ms" style="font-size:20px;color:var(--tv);">phone</span><a href="tel:' + ev.phone.trim() + '" style="font-size:14px;color:var(--tx);text-decoration:none;">' + ev.phone + '</a></div>';
+    }
+  }
+  
+  var notesTextEl = document.getElementById('detail-notes-text');
+  if(notesTextEl){
+    notesTextEl.textContent = ev.notes && ev.notes.trim() !== '' ? ev.notes : 'Aucune note';
+  }
+  
+  var mapEl = document.getElementById('detail-event-map');
+  if(mapEl) mapEl.style.display = 'none';
+  
   showSheet('sheet-event-detail');
 }
 
-function openNewEvent(){ var p=document.getElementById('panel-new-event'); if(p){ p.style.display='block'; var t=document.getElementById('ev-title'); if(t){t.value='';t.focus();} } }
-
-function openNewEventWithDateTime(day, month, time) {
-  var p=document.getElementById('panel-new-event');
-  var m=document.getElementById('m-new-event');
-  if(p){
-    p.style.display='block';
-    var t=p.querySelector('#ev-title');
-    if(t){t.value='';t.focus();}
-    var dEl=p.querySelector('#ev-day');
-    var mEl=p.querySelector('#ev-month');
-    var tEl=p.querySelector('#ev-time');
-    if(dEl) dEl.value = String(day);
-    if(mEl) mEl.value = String(month);
-    if(tEl && time) tEl.value = time;
+function openEditEvent(idx) {
+  var ev = calEvents[idx];
+  if(!ev) return;
+  
+  closeSheet('sheet-event-detail');
+  resetEventForm();
+  
+  editingEventIndex = idx;
+  
+  var m = document.getElementById('m-new-event');
+  if(m) {
+    var titleEl = m.querySelector('#ev-title');
+    var dayEl = m.querySelector('#ev-day');
+    var monthEl = m.querySelector('#ev-month');
+    var timeEl = m.querySelector('#ev-time');
+    var endTimeEl = m.querySelector('#ev-end-time');
+    var phoneEl = m.querySelector('#ev-phone');
+    var addrEl = m.querySelector('#ev-addr');
+    var notesEl = m.querySelector('#ev-notes');
+    var alldayEl = m.querySelector('#ev-allday');
+    
+    if (titleEl) titleEl.value = ev.label || '';
+    if (dayEl) dayEl.value = String(ev.day || 1);
+    if (monthEl) monthEl.value = String(ev.month || 4);
+    
+    if (ev.time) {
+      if (timeEl) timeEl.value = ev.time;
+      if (endTimeEl) endTimeEl.value = ev.endTime || '';
+      if (alldayEl) {
+        alldayEl.checked = false;
+        toggleTimeFields(false);
+      }
+    } else {
+      if (alldayEl) {
+        alldayEl.checked = true;
+        toggleTimeFields(true);
+      }
+    }
+    
+    if (addrEl) addrEl.value = ev.addr || '';
+    if (phoneEl) phoneEl.value = ev.phone || '';
+    if (notesEl) notesEl.value = ev.notes || '';
+    
+    var membersList = ['david', 'laetitia', 'eva', 'chloe'];
+    membersList.forEach(function(mKey){
+      var chk = m.querySelector('#ev-m-' + mKey);
+      if(chk) {
+        chk.checked = (mKey === ev.member);
+      }
+    });
   }
-  if(m){
-    var dEl=m.querySelector('#ev-day');
-    var mEl=m.querySelector('#ev-month');
-    var tEl=m.querySelector('#ev-time');
-    if(dEl) dEl.value = String(day);
-    if(mEl) mEl.value = String(month);
-    if(tEl && time) tEl.value = time;
+  
+  var headerText = document.getElementById('btn-save-event-header-text');
+  var bottomText = document.getElementById('btn-save-event-bottom-text');
+  if(headerText) headerText.textContent = 'Enregistrer';
+  if(bottomText) bottomText.textContent = 'Enregistrer';
+  
+  openModal('m-new-event');
+}
+
+function openNewEvent() {
+  resetEventForm();
+  openModal('m-new-event');
+  var m = document.getElementById('m-new-event');
+  if (m) {
+    var t = m.querySelector('#ev-title');
+    if (t) t.focus();
   }
 }
 
-function toggleNewEventPanel(){ var p=document.getElementById('panel-new-event'); if(p){ var open=p.style.display==='block'; p.style.display=open?'none':'block'; if(!open){ var t=document.getElementById('ev-title'); if(t){t.value='';t.focus();} } } }
+function openNewEventWithDateTime(day, month, time) {
+  resetEventForm();
+  openModal('m-new-event');
+  var m = document.getElementById('m-new-event');
+  if (m) {
+    var t = m.querySelector('#ev-title');
+    if (t) t.focus();
+    var dEl = m.querySelector('#ev-day');
+    var mEl = m.querySelector('#ev-month');
+    var tEl = m.querySelector('#ev-time');
+    if (dEl) dEl.value = String(day);
+    if (mEl) mEl.value = String(month);
+    if (tEl && time) {
+      tEl.value = time;
+    }
+  }
+}
 
 function saveNewEvent(){
-  var panel = document.getElementById('panel-new-event');
   var modal = document.getElementById('m-new-event');
-  var c = (modal && modal.offsetParent !== null) ? modal : panel;
-  if (!c) c = document;
+  if (!modal) return;
 
-  var titleEl = c.querySelector('#ev-title');
+  var titleEl = modal.querySelector('#ev-title');
   var title = titleEl ? titleEl.value.trim() : '';
   if(!title){ alert('Entrez un titre'); return; }
   
-  var dayEl = c.querySelector('#ev-day');
+  var dayEl = modal.querySelector('#ev-day');
   var day = dayEl ? parseInt(dayEl.value) || 1 : 1;
   
-  var monthEl = c.querySelector('#ev-month');
+  var monthEl = modal.querySelector('#ev-month');
   var month = monthEl ? parseInt(monthEl.value) || 4 : 4;
   
-  var timeEl = c.querySelector('#ev-time');
-  var time = timeEl ? timeEl.value || '' : '';
+  var alldayEl = modal.querySelector('#ev-allday');
+  var isAllday = alldayEl ? alldayEl.checked : false;
+
+  var timeEl = modal.querySelector('#ev-time');
+  var time = (timeEl && !isAllday) ? timeEl.value || '' : '';
   
-  var addrEl = c.querySelector('#ev-addr');
+  var endTimeEl = modal.querySelector('#ev-end-time');
+  var endTime = (endTimeEl && !isAllday) ? endTimeEl.value || '' : '';
+  
+  var phoneEl = modal.querySelector('#ev-phone');
+  var phone = phoneEl ? phoneEl.value.trim() : '';
+  
+  var addrEl = modal.querySelector('#ev-addr');
   var addr = addrEl ? addrEl.value || '' : '';
   
-  var notesEl = c.querySelector('#ev-notes');
+  var notesEl = modal.querySelector('#ev-notes');
   var notes = notesEl ? notesEl.value || '' : '';
 
   var selMember = currentUser;
-  if(c.querySelector('#ev-m-laetitia') && c.querySelector('#ev-m-laetitia').checked) selMember='laetitia';
-  if(c.querySelector('#ev-m-eva') && c.querySelector('#ev-m-eva').checked) selMember='eva';
-  if(c.querySelector('#ev-m-chloe') && c.querySelector('#ev-m-chloe').checked) selMember='chloe';
-  if(c.querySelector('#ev-m-david') && c.querySelector('#ev-m-david').checked) selMember='david';
+  if(modal.querySelector('#ev-m-laetitia') && modal.querySelector('#ev-m-laetitia').checked) selMember='laetitia';
+  if(modal.querySelector('#ev-m-eva') && modal.querySelector('#ev-m-eva').checked) selMember='eva';
+  if(modal.querySelector('#ev-m-chloe') && modal.querySelector('#ev-m-chloe').checked) selMember='chloe';
+  if(modal.querySelector('#ev-m-david') && modal.querySelector('#ev-m-david').checked) selMember='david';
 
-  calEvents.push({ day:day, month:month, year:2026, label:title, time:time, member:selMember, addr:addr, notes:notes });
+  var eventYear = TODAY.getFullYear();
+  if (calView === 'hebdo') {
+    var baseMonday = getMonday(TODAY);
+    var monday = new Date(baseMonday);
+    monday.setDate(baseMonday.getDate() + calOffset * 7);
+    eventYear = monday.getFullYear();
+  } else if (calView === 'jour') {
+    var activeDate = new Date(TODAY);
+    activeDate.setDate(TODAY.getDate() + calOffset);
+    eventYear = activeDate.getFullYear();
+  } else {
+    var baseDate = new Date(TODAY.getFullYear(), TODAY.getMonth() + calOffset, 1);
+    eventYear = baseDate.getFullYear();
+  }
 
-  if(panel) panel.style.display='none';
-  if(modal) modal.style.display='none';
-  if(titleEl) titleEl.value = '';
+  var evData = { day:day, month:month, year:eventYear, label:title, member:selMember, addr:addr, notes:notes };
+  if (time) evData.time = time;
+  if (endTime) evData.endTime = endTime;
+  if (phone) evData.phone = phone;
 
-  calOffset = (2026 - TODAY.getFullYear())*12 + (month - (TODAY.getMonth()+1));
+  var isEdition = (editingEventIndex !== -1);
+  if (isEdition) {
+    calEvents[editingEventIndex] = evData;
+  } else {
+    calEvents.push(evData);
+  }
+
+  closeModal('m-new-event');
+  resetEventForm();
+
+  calOffset = (eventYear - TODAY.getFullYear())*12 + (month - (TODAY.getMonth()+1));
   calView = 'mensuel';
   renderCalendar();
   saveServerData();
-  showToast('Événement ajouté !');
+  showToast(isEdition ? 'Événement modifié !' : 'Événement ajouté !');
 }
 
 
 let calView='hebdo'; // 'hebdo' | 'mensuel' | 'jour'
 let calOffset=0; // week offset for hebdo, month offset for mensuel, day offset for jour
 const TODAY=new Date(2026,2,25); // 25 Mars 2026
+var editingEventIndex = -1;
+var currentDetailEventIndex = -1;
 
 function getMonday(d){
   const day=d.getDay()||7;
@@ -2629,6 +2894,7 @@ function renderCalendar(){
   var periodLabel=document.getElementById('cal-period-label');
   if(!grid) return;
   renderCalMemberPills();
+  renderUpcomingEvents();
 
   // Filter events by active members
   var filtered=calEvents.filter(function(e){
@@ -2721,7 +2987,8 @@ function renderCalendar(){
       allDayEvents.forEach(function(ev){
         var col = memberColors[ev.member] || '#888';
         var bg = lighten(col, 0.88);
-        html += '<div onclick="openEventDetail()" style="background:'+bg+';border-left:3px solid '+col+';padding:8px 10px;border-radius:8px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;">';
+        var evIdx = calEvents.indexOf(ev);
+        html += '<div onclick="openEventDetail(' + evIdx + ')" style="background:'+bg+';border-left:3px solid '+col+';padding:8px 10px;border-radius:8px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;">';
         html += '<div>';
         html += '<span style="font-size:12px;font-weight:700;color:'+col+';margin-right:6px;">'+members[ev.member]+'</span>';
         html += '<span style="font-size:12px;font-weight:600;color:var(--tx);">'+ev.label+'</span>';
@@ -2753,7 +3020,8 @@ function renderCalendar(){
         evs.forEach(function(ev){
           var col = memberColors[ev.member] || '#888';
           var bg = lighten(col, 0.88);
-          html += '<div onclick="openEventDetail()" style="background:'+bg+';border-left:3.5px solid '+col+';padding:5px 8px;border-radius:7px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;">';
+          var evIdx = calEvents.indexOf(ev);
+          html += '<div onclick="openEventDetail(' + evIdx + ')" style="background:'+bg+';border-left:3.5px solid '+col+';padding:5px 8px;border-radius:7px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;">';
           html += '<div>';
           html += '<span style="font-size:11px;font-weight:700;color:'+col+';margin-right:6px;">'+members[ev.member]+'</span>';
           html += '<span style="font-size:11px;font-weight:600;color:var(--tx);">'+ev.label+(ev.time?' '+ev.time:'')+'</span>';
@@ -2891,7 +3159,8 @@ function openDaySheet(day,month,year){
     list.innerHTML=evs.map(function(ev){
       var col=memberColors[ev.member]||'#888';
       var bg=lighten(col,0.88);
-      return '<div style="display:flex;gap:14px;align-items:flex-start;padding:14px;background:'+bg+';border-radius:14px;margin-bottom:10px;border-left:4px solid '+col+';cursor:pointer;" onclick="openEventDetail()">'
+      var evIdx = calEvents.indexOf(ev);
+      return '<div style="display:flex;gap:14px;align-items:flex-start;padding:14px;background:'+bg+';border-radius:14px;margin-bottom:10px;border-left:4px solid '+col+';cursor:pointer;" onclick="openEventDetail('+evIdx+')">'
         +'<div style="flex:1;">'
         +'<div style="display:flex;align-items:center;gap:7px;margin-bottom:4px;">'
         +'<div class="av" style="width:22px;height:22px;font-size:9px;background:'+col+';color:white;font-weight:800;">'+members[ev.member].charAt(0)+'</div>'
