@@ -625,7 +625,7 @@ window.addEventListener('DOMContentLoaded', () => {
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px;">
       <select id="ev-day" class="input-field"><option>1</option><option>2</option><option>3</option><option selected>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option><option>24</option><option>25</option><option>26</option><option>27</option><option>28</option><option>29</option><option>30</option><option>31</option></select>
       <select id="ev-month" class="input-field"><option value="1">Jan</option><option value="2">Fév</option><option value="3">Mar</option><option value="4" selected>Avr</option><option value="5">Mai</option><option value="6">Jun</option><option value="7">Jul</option><option value="8">Aoû</option><option value="9">Sep</option><option value="10">Oct</option><option value="11">Nov</option><option value="12">Déc</option></select>
-      <select id="ev-time" class="input-field"><option>08:00</option><option>09:00</option><option>10:00</option><option>11:00</option><option>12:00</option><option>13:00</option><option>14:00</option><option>15:00</option><option>16:00</option><option>17:00</option><option selected>18:00</option><option>19:00</option><option>20:00</option><option>21:00</option><option>22:00</option></select>
+      <input type="time" id="ev-time" class="input-field" value="18:00"/>
     </div>
     <input class="input-field" id="ev-addr" placeholder="Lieu (optionnel)" type="text" style="margin-bottom:10px;"/>
     <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
@@ -651,8 +651,9 @@ window.addEventListener('DOMContentLoaded', () => {
         <button onclick="calNext()" style="width:34px;height:34px;border-radius:99px;background:var(--s1);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;"><span class="ms" style="font-size:18px;color:var(--tv);">chevron_right</span></button>
       </div>
       <div style="display:flex;background:var(--s1);border-radius:99px;padding:3px;">
-        <button id="btn-hebdo" onclick="setCalView('hebdo')" style="border:none;font-family:inherit;cursor:pointer;padding:6px 14px;border-radius:99px;font-size:11px;font-weight:700;background:var(--s0);color:var(--tx);box-shadow:0 1px 4px rgba(49,51,44,.08);">Hebdo</button>
-        <button id="btn-mensuel" onclick="setCalView('mensuel')" style="border:none;font-family:inherit;cursor:pointer;padding:6px 14px;border-radius:99px;font-size:11px;font-weight:700;color:var(--tv);">Mensuel</button>
+        <button id="btn-jour" onclick="setCalView('jour')" style="border:none;font-family:inherit;cursor:pointer;padding:6px 10px;border-radius:99px;font-size:11px;font-weight:700;color:var(--tv);">Jour</button>
+        <button id="btn-hebdo" onclick="setCalView('hebdo')" style="border:none;font-family:inherit;cursor:pointer;padding:6px 10px;border-radius:99px;font-size:11px;font-weight:700;background:var(--s0);color:var(--tx);box-shadow:0 1px 4px rgba(49,51,44,.08);">Hebdo</button>
+        <button id="btn-mensuel" onclick="setCalView('mensuel')" style="border:none;font-family:inherit;cursor:pointer;padding:6px 10px;border-radius:99px;font-size:11px;font-weight:700;color:var(--tv);">Mensuel</button>
       </div>
     </div>
     <!-- Member pills -->
@@ -1740,9 +1741,7 @@ window.addEventListener('DOMContentLoaded', () => {
       <select id="ev-month" class="input-field">
         <option value="1">Jan</option><option value="2">Fév</option><option value="3">Mar</option><option value="4" selected>Avr</option><option value="5">Mai</option><option value="6">Jun</option><option value="7">Jul</option><option value="8">Aoû</option><option value="9">Sep</option><option value="10">Oct</option><option value="11">Nov</option><option value="12">Déc</option>
       </select>
-      <select id="ev-time" class="input-field">
-        <option>08:00</option><option>09:00</option><option>10:00</option><option>11:00</option><option>12:00</option><option>13:00</option><option>14:00</option><option>15:00</option><option>16:00</option><option>17:00</option><option selected>18:00</option><option>19:00</option><option>20:00</option><option>21:00</option><option>22:00</option>
-      </select>
+      <input type="time" id="ev-time" class="input-field" value="18:00"/>
     </div>
     <input class="input-field" id="ev-addr" placeholder="Lieu, adresse…" type="text"/>
     <textarea class="input-field" id="ev-notes" placeholder="Notes…" style="height:80px;resize:none;"></textarea>
@@ -2527,6 +2526,30 @@ function openEventDetail(){
 
 function openNewEvent(){ var p=document.getElementById('panel-new-event'); if(p){ p.style.display='block'; var t=document.getElementById('ev-title'); if(t){t.value='';t.focus();} } }
 
+function openNewEventWithDateTime(day, month, time) {
+  var p=document.getElementById('panel-new-event');
+  var m=document.getElementById('m-new-event');
+  if(p){
+    p.style.display='block';
+    var t=p.querySelector('#ev-title');
+    if(t){t.value='';t.focus();}
+    var dEl=p.querySelector('#ev-day');
+    var mEl=p.querySelector('#ev-month');
+    var tEl=p.querySelector('#ev-time');
+    if(dEl) dEl.value = String(day);
+    if(mEl) mEl.value = String(month);
+    if(tEl && time) tEl.value = time;
+  }
+  if(m){
+    var dEl=m.querySelector('#ev-day');
+    var mEl=m.querySelector('#ev-month');
+    var tEl=m.querySelector('#ev-time');
+    if(dEl) dEl.value = String(day);
+    if(mEl) mEl.value = String(month);
+    if(tEl && time) tEl.value = time;
+  }
+}
+
 function toggleNewEventPanel(){ var p=document.getElementById('panel-new-event'); if(p){ var open=p.style.display==='block'; p.style.display=open?'none':'block'; if(!open){ var t=document.getElementById('ev-title'); if(t){t.value='';t.focus();} } } }
 
 function saveNewEvent(){
@@ -2560,7 +2583,7 @@ function saveNewEvent(){
   if(c.querySelector('#ev-m-chloe') && c.querySelector('#ev-m-chloe').checked) selMember='chloe';
   if(c.querySelector('#ev-m-david') && c.querySelector('#ev-m-david').checked) selMember='david';
 
-  calEvents.push({ day:day, month:month, year:2026, label:title+(time?' '+time:''), member:selMember, addr:addr, notes:notes });
+  calEvents.push({ day:day, month:month, year:2026, label:title, time:time, member:selMember, addr:addr, notes:notes });
 
   if(panel) panel.style.display='none';
   if(modal) modal.style.display='none';
@@ -2574,8 +2597,8 @@ function saveNewEvent(){
 }
 
 
-let calView='hebdo'; // 'hebdo' | 'mensuel'
-let calOffset=0; // week offset for hebdo, month offset for mensuel
+let calView='hebdo'; // 'hebdo' | 'mensuel' | 'jour'
+let calOffset=0; // week offset for hebdo, month offset for mensuel, day offset for jour
 const TODAY=new Date(2026,2,25); // 25 Mars 2026
 
 function getMonday(d){
@@ -2640,7 +2663,7 @@ function renderCalendar(){
         var textCol=isToday?'rgba(255,255,255,.9)':col;
         html+='<div style="background:'+bg+';padding:3px 4px;border-radius:7px;width:100%;'+(isToday?'':'border-left:2.5px solid '+col)+';margin-bottom:3px;">';
         html+='<p style="font-size:7px;font-weight:700;color:'+textCol+';">'+members[ev.member]+'</p>';
-        html+='<p style="font-size:7px;color:'+(isToday?'rgba(255,255,255,.8)':'var(--tx)')+';">'+ev.label+'</p>';
+        html+='<p style="font-size:7px;color:'+(isToday?'rgba(255,255,255,.8)':'var(--tx)')+';">'+ev.label+(ev.time?' '+ev.time:'')+'</p>';
         html+='</div>';
       });
       if(evs.length===0&&!isToday){
@@ -2649,6 +2672,111 @@ function renderCalendar(){
       html+='</div>';
     }
     grid.innerHTML=html;
+
+  } else if(calView==='jour'){
+    var activeDate = new Date(TODAY);
+    activeDate.setDate(TODAY.getDate() + calOffset);
+    var activeDay = activeDate.getDate();
+    var activeMonth = activeDate.getMonth() + 1;
+    var activeYear = activeDate.getFullYear();
+    
+    var dayNames=['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+    monthLabel.textContent = MONTHS[activeDate.getMonth()] + ' ' + activeYear;
+    periodLabel.textContent = dayNames[activeDate.getDay()] + ' ' + activeDay;
+    
+    headers.style.display = 'none';
+    grid.style.gridTemplateColumns = '1fr';
+    
+    var dayEvents = filtered.filter(function(e){
+      return e.day === activeDay && e.month === activeMonth && e.year === activeYear;
+    });
+
+    var allDayEvents = [];
+    var hourlyEvents = {};
+    
+    dayEvents.forEach(function(ev){
+      var hasTime = ('time' in ev) && ev.time !== undefined && ev.time !== null && ev.time !== '';
+      if(hasTime){
+        var t = ev.time.trim();
+        var m = t.match(/^(\d{1,2})[h:](\d{2})$/);
+        if(m){
+          var hour = parseInt(m[1]);
+          if(hour >= 0 && hour <= 23){
+            if(!hourlyEvents[hour]) hourlyEvents[hour] = [];
+            hourlyEvents[hour].push(ev);
+            return;
+          }
+        }
+      }
+      allDayEvents.push(ev);
+    });
+
+    var html = '';
+    
+    // Bandeau "Toute la journée"
+    if (allDayEvents.length > 0) {
+      html += '<div style="background:var(--s1);border-radius:14px;padding:12px;margin-bottom:14px;">';
+      html += '<p style="font-size:10px;font-weight:700;color:var(--olv);text-transform:uppercase;margin-bottom:6px;letter-spacing:.05em;">Toute la journée</p>';
+      html += '<div style="display:flex;flex-direction:column;gap:6px;">';
+      allDayEvents.forEach(function(ev){
+        var col = memberColors[ev.member] || '#888';
+        var bg = lighten(col, 0.88);
+        html += '<div onclick="openEventDetail()" style="background:'+bg+';border-left:3px solid '+col+';padding:8px 10px;border-radius:8px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;">';
+        html += '<div>';
+        html += '<span style="font-size:12px;font-weight:700;color:'+col+';margin-right:6px;">'+members[ev.member]+'</span>';
+        html += '<span style="font-size:12px;font-weight:600;color:var(--tx);">'+ev.label+'</span>';
+        html += '</div>';
+        if (ev.addr) {
+          html += '<span style="font-size:10px;color:var(--tv);"><span class="ms" style="font-size:12px;vertical-align:middle;margin-right:2px;">place</span>'+ev.addr+'</span>';
+        }
+        html += '</div>';
+      });
+      html += '</div></div>';
+    }
+
+    // Frise horaire (00:00 - 23:00)
+    html += '<div style="display:flex;flex-direction:column;gap:1px;background:var(--s2);border-radius:14px;overflow:hidden;box-shadow:0 4px 12px rgba(49,51,44,.05);">';
+    for (var h = 0; h < 24; h++) {
+      var hourStr = (h < 10 ? '0' + h : h) + ':00';
+      var evs = hourlyEvents[h] || [];
+      
+      html += '<div style="display:flex;background:var(--s0);min-height:48px;border-bottom:1px solid var(--s2);align-items:stretch;">';
+      
+      // Colonne des heures
+      html += '<div style="width:50px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--olv);background:var(--s1);border-right:1px solid var(--s2);flex-shrink:0;">';
+      html += hourStr;
+      html += '</div>';
+      
+      // Colonne des événements
+      if (evs.length > 0) {
+        html += '<div style="flex:1;padding:4px 8px;display:flex;flex-direction:column;gap:4px;justify-content:center;">';
+        evs.forEach(function(ev){
+          var col = memberColors[ev.member] || '#888';
+          var bg = lighten(col, 0.88);
+          html += '<div onclick="openEventDetail()" style="background:'+bg+';border-left:3.5px solid '+col+';padding:5px 8px;border-radius:7px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;">';
+          html += '<div>';
+          html += '<span style="font-size:11px;font-weight:700;color:'+col+';margin-right:6px;">'+members[ev.member]+'</span>';
+          html += '<span style="font-size:11px;font-weight:600;color:var(--tx);">'+ev.label+(ev.time?' '+ev.time:'')+'</span>';
+          html += '</div>';
+          if (ev.addr) {
+            html += '<span style="font-size:10px;color:var(--tv);"><span class="ms" style="font-size:11px;vertical-align:middle;margin-right:2px;">place</span>'+ev.addr+'</span>';
+          }
+          html += '</div>';
+        });
+        html += '</div>';
+      } else {
+        // Créneau vide cliquable
+        var clickParams = activeDay + ',' + activeMonth + ',\'' + hourStr + '\'';
+        html += '<div onclick="openNewEventWithDateTime(' + clickParams + ')" style="flex:1;cursor:pointer;display:flex;align-items:center;padding-left:12px;" class="empty-hour-slot">';
+        html += '<span class="ms" style="font-size:15px;color:var(--s3);">add</span>';
+        html += '</div>';
+      }
+      
+      html += '</div>';
+    }
+    html += '</div>';
+    
+    grid.innerHTML = html;
 
   } else {
     var baseDate=new Date(TODAY.getFullYear(),TODAY.getMonth()+calOffset,1);
@@ -2722,16 +2850,17 @@ function toggleMemberFilter(key){
 
 function setCalView(v){
   calView=v;calOffset=0;
+  var btnJ=document.getElementById('btn-jour');
   var btnH=document.getElementById('btn-hebdo');
   var btnM=document.getElementById('btn-mensuel');
-  if(btnH&&btnM){
-    if(v==='hebdo'){
-      btnH.style.cssText='border:none;font-family:inherit;cursor:pointer;padding:6px 14px;border-radius:99px;font-size:11px;font-weight:700;background:var(--s0);color:var(--tx);box-shadow:0 1px 4px rgba(49,51,44,.08);';
-      btnM.style.cssText='border:none;font-family:inherit;cursor:pointer;padding:6px 14px;border-radius:99px;font-size:11px;font-weight:700;color:var(--tv);';
-    }else{
-      btnM.style.cssText='border:none;font-family:inherit;cursor:pointer;padding:6px 14px;border-radius:99px;font-size:11px;font-weight:700;background:var(--s0);color:var(--tx);box-shadow:0 1px 4px rgba(49,51,44,.08);';
-      btnH.style.cssText='border:none;font-family:inherit;cursor:pointer;padding:6px 14px;border-radius:99px;font-size:11px;font-weight:700;color:var(--tv);';
-    }
+  
+  var activeStyle = 'border:none;font-family:inherit;cursor:pointer;padding:6px 10px;border-radius:99px;font-size:11px;font-weight:700;background:var(--s0);color:var(--tx);box-shadow:0 1px 4px rgba(49,51,44,.08);';
+  var inactiveStyle = 'border:none;font-family:inherit;cursor:pointer;padding:6px 10px;border-radius:99px;font-size:11px;font-weight:700;color:var(--tv);';
+  
+  if(btnJ && btnH && btnM){
+    btnJ.style.cssText = (v==='jour') ? activeStyle : inactiveStyle;
+    btnH.style.cssText = (v==='hebdo') ? activeStyle : inactiveStyle;
+    btnM.style.cssText = (v==='mensuel') ? activeStyle : inactiveStyle;
   }
   renderCalendar();
 }
@@ -2768,7 +2897,7 @@ function openDaySheet(day,month,year){
         +'<div class="av" style="width:22px;height:22px;font-size:9px;background:'+col+';color:white;font-weight:800;">'+members[ev.member].charAt(0)+'</div>'
         +'<span style="font-size:11px;font-weight:700;color:'+col+';">'+members[ev.member]+'</span>'
         +'</div>'
-        +'<h3 style="font-size:16px;font-weight:700;margin-bottom:3px;">'+ev.label+'</h3>'
+        +'<h3 style="font-size:16px;font-weight:700;margin-bottom:3px;">'+ev.label+(ev.time?' '+ev.time:'')+'</h3>'
         +'<p style="font-size:12px;color:var(--tv);">'+day+' '+monthName+' '+year+'</p>'
         +'</div>'
         +'<span class="ms" style="font-size:18px;color:'+col+';">chevron_right</span>'
