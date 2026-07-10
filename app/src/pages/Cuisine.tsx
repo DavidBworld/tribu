@@ -113,6 +113,10 @@ export default function Cuisine() {
       queryClient.invalidateQueries({ queryKey: ['recipes', familyId] });
       closeForm();
     },
+    onError: (error: Error) => {
+      console.error('Erreur création recette:', error);
+      alert(`Erreur lors de la création : ${error.message}`);
+    },
   });
 
   const updateMutation = useMutation({
@@ -120,6 +124,10 @@ export default function Cuisine() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['recipes', familyId] });
       closeForm();
+    },
+    onError: (error: Error) => {
+      console.error('Erreur modification recette:', error);
+      alert(`Erreur lors de la modification : ${error.message}`);
     },
   });
 
@@ -270,7 +278,10 @@ export default function Cuisine() {
   };
 
   const onSubmit = (values: RecipeFormValues) => {
-    if (!familyId) return;
+    if (!familyId) {
+      alert("Erreur : impossible de déterminer votre famille. Rechargez la page et réessayez.");
+      return;
+    }
     const finalData = {
       ...values,
       family_id: familyId,
