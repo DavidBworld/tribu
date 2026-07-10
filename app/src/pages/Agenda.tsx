@@ -10,7 +10,8 @@ import type { AgendaEvent } from '@/lib/supabase-data/agenda';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { 
   Calendar as CalendarIcon, 
   Plus, 
@@ -21,7 +22,6 @@ import {
   FileText, 
   Trash2, 
   Edit, 
-  X, 
   Check,
   ChevronLeft,
   ChevronRight,
@@ -92,7 +92,7 @@ export default function Agenda() {
   const [view, setView] = useState<'month' | 'week' | 'day'>('month');
   const [anchorDate, setAnchorDate] = useState<Date>(new Date());
   
-  // États de contrôle des modales
+  // États de contrôle des modales (Sheets)
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<AgendaEvent | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<AgendaEvent | null>(null);
@@ -217,6 +217,8 @@ export default function Agenda() {
   };
 
   const openEditForm = (event: AgendaEvent) => {
+    // Fermer le détail avant d'ouvrir l'édition
+    setSelectedEvent(null);
     setEditingEvent(event);
     setFormError(null);
     reset({
@@ -348,7 +350,7 @@ export default function Agenda() {
   }
 
   return (
-    <div className="relative space-y-6">
+    <div className="relative space-y-6 pb-6">
       {/* Barre d'actions supérieure */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b pb-5">
         <div>
@@ -394,7 +396,7 @@ export default function Agenda() {
       </div>
 
       {/* Barre de navigation temporelle */}
-      <div className="flex items-center justify-between bg-card p-3 rounded-xl border shadow-sm">
+      <div className="flex items-center justify-between bg-card p-3 rounded-xl border shadow-sm select-none">
         <div className="flex items-center gap-2">
           <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => navigateDate('prev')}>
             <ChevronLeft className="h-4 w-4" />
@@ -409,81 +411,77 @@ export default function Agenda() {
         <h3 className="font-bold text-sm tracking-wide text-foreground truncate max-w-[200px] sm:max-w-none">
           {getPeriodLabel()}
         </h3>
-        <div className="w-20" /> {/* Espaceur pour équilibrer */}
+        <div className="w-20 hidden sm:block" />
       </div>
 
-      {/* Grilles de calendrier */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          {view === 'month' && (
-            <MonthView 
-              anchorDate={anchorDate} 
-              events={events} 
-              onSelectEvent={setSelectedEvent}
-              onSelectDate={(d) => {
-                setAnchorDate(d);
-                setView('day');
-              }}
-              onEmptyClick={(d) => openCreateForm(formatIsoDate(d))}
-              getMemberColors={getMemberColors}
-            />
-          )}
+      {/* Grille du Calendrier - pleine largeur désormais */}
+      <div className="w-full">
+        {view === 'month' && (
+          <MonthView 
+            anchorDate={anchorDate} 
+            events={events} 
+            onSelectEvent={setSelectedEvent}
+            onSelectDate={(d) => {
+              setAnchorDate(d);
+              setView('day');
+            }}
+            onEmptyClick={(d) => openCreateForm(formatIsoDate(d))}
+            getMemberColors={getMemberColors}
+          />
+        )}
 
-          {view === 'week' && (
-            <WeekView 
-              anchorDate={anchorDate}
-              events={events}
-              onSelectEvent={setSelectedEvent}
-              onEmptyClick={(d, h) => openCreateForm(d, h)}
-              getMemberColors={getMemberColors}
-              scrollContainerRef={scrollContainerRef}
-            />
-          )}
+        {view === 'week' && (
+          <WeekView 
+            anchorDate={anchorDate}
+            events={events}
+            onSelectEvent={setSelectedEvent}
+            onEmptyClick={(d, h) => openCreateForm(d, h)}
+            getMemberColors={getMemberColors}
+            scrollContainerRef={scrollContainerRef}
+          />
+        )}
 
-          {view === 'day' && (
-            <DayView 
-              events={eventsForCurrentDate(formatIsoDate(anchorDate))}
-              onSelectEvent={setSelectedEvent}
-              onEmptyClick={(h) => openCreateForm(formatIsoDate(anchorDate), h)}
-              getMemberColors={getMemberColors}
-              scrollContainerRef={scrollContainerRef}
-            />
-          )}
-        </div>
+        {view === 'day' && (
+          <DayView 
+            events={eventsForCurrentDate(formatIsoDate(anchorDate))}
+            onSelectEvent={setSelectedEvent}
+            onEmptyClick={(h) => openCreateForm(formatIsoDate(anchorDate), h)}
+            getMemberColors={getMemberColors}
+            scrollContainerRef={scrollContainerRef}
+          />
+        )}
+      </div>
 
-        {/* Panneau de détail latéral */}
-        <div className="lg:col-span-1">
-          {selectedEvent ? (
-            <Card className="sticky top-6 border-primary/20 bg-card shadow-lg overflow-hidden transition-all duration-300">
-              <div className="bg-primary/5 p-4 border-b border-muted flex items-center justify-between">
-                <h3 className="font-bold text-foreground text-sm flex items-center gap-1.5">
-                  <Maximize2 className="h-4 w-4 text-primary" /> Détails de l'événement
-                </h3>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  onClick={() => setSelectedEvent(null)}
-                  className="h-8 w-8 hover:bg-muted"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
+      {/* BOTTOM SHEET DÉTAIL DE L'ÉVÉNEMENT (shadcn-ui Sheet side="bottom") */}
+      <Sheet open={!!selectedEvent} onOpenChange={(open) => !open && setSelectedEvent(null)}>
+        <SheetContent side="bottom" className="w-full sm:max-w-md mx-auto rounded-t-[24px] p-0 overflow-hidden border-t shadow-2xl bg-card">
+          {selectedEvent && (
+            <div className="flex flex-col h-full">
+              {/* Header avec titre */}
+              <div className="bg-primary/5 px-6 py-4 border-b border-muted">
+                <SheetHeader className="p-0 text-left">
+                  <SheetTitle className="text-sm font-bold text-foreground flex items-center gap-1.5">
+                    <Maximize2 className="h-4 w-4 text-primary" /> Détails de l'événement
+                  </SheetTitle>
+                </SheetHeader>
               </div>
               
-              <CardContent className="p-5 space-y-5">
+              {/* Contenu détaillé */}
+              <div className="p-6 space-y-5 overflow-y-auto max-h-[70vh]">
                 <div>
-                  <h2 className="text-lg font-bold text-foreground mb-1 leading-snug">{selectedEvent.title}</h2>
+                  <h2 className="text-xl font-extrabold text-foreground mb-1 leading-snug">{selectedEvent.title}</h2>
                   <p className="text-xs text-primary font-semibold flex items-center gap-1.5">
                     <CalendarIcon className="h-3.5 w-3.5" />
                     {formatDateLong(selectedEvent.event_date)}
                   </p>
                 </div>
 
-                <div className="space-y-3.5 text-xs text-foreground/80">
-                  <div className="flex items-start gap-2.5">
+                <div className="space-y-4 text-xs text-foreground/85">
+                  <div className="flex items-start gap-3">
                     <Clock className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
                     <div>
-                      <span className="block font-medium text-muted-foreground">Horaire</span>
-                      <span>
+                      <span className="block font-semibold text-[10px] text-muted-foreground uppercase tracking-wider">Horaire</span>
+                      <span className="text-sm font-medium">
                         {selectedEvent.all_day 
                           ? 'Toute la journée' 
                           : `${selectedEvent.start_time}${selectedEvent.end_time ? ` à ${selectedEvent.end_time}` : ''}`}
@@ -492,23 +490,23 @@ export default function Agenda() {
                   </div>
 
                   {selectedEvent.location && (
-                    <div className="flex items-start gap-2.5">
+                    <div className="flex items-start gap-3">
                       <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
                       <div>
-                        <span className="block font-medium text-muted-foreground">Lieu</span>
-                        <span className="break-words">{selectedEvent.location}</span>
+                        <span className="block font-semibold text-[10px] text-muted-foreground uppercase tracking-wider">Lieu</span>
+                        <span className="text-sm font-medium break-words">{selectedEvent.location}</span>
                       </div>
                     </div>
                   )}
 
                   {selectedEvent.phone && (
-                    <div className="flex items-start gap-2.5">
+                    <div className="flex items-start gap-3">
                       <Phone className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
                       <div>
-                        <span className="block font-medium text-muted-foreground">Téléphone</span>
+                        <span className="block font-semibold text-[10px] text-muted-foreground uppercase tracking-wider">Téléphone</span>
                         <a 
                           href={`tel:${selectedEvent.phone}`} 
-                          className="text-primary hover:underline font-semibold"
+                          className="text-primary hover:underline text-sm font-bold"
                         >
                           {selectedEvent.phone}
                         </a>
@@ -516,72 +514,64 @@ export default function Agenda() {
                     </div>
                   )}
 
-                  <div className="flex items-start gap-2.5">
+                  <div className="flex items-start gap-3">
                     <User className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
                     <div>
-                      <span className="block font-medium text-muted-foreground">Assigné à</span>
-                      <span className="font-semibold text-primary">{getMemberName(selectedEvent.assigned_member_id)}</span>
+                      <span className="block font-semibold text-[10px] text-muted-foreground uppercase tracking-wider">Assigné à</span>
+                      <span className="text-sm font-bold text-primary">{getMemberName(selectedEvent.assigned_member_id)}</span>
                     </div>
                   </div>
                 </div>
 
                 {selectedEvent.notes && (
                   <div className="pt-4 border-t border-muted">
-                    <span className="block font-medium text-muted-foreground mb-1.5 flex items-center gap-1.5">
+                    <span className="block font-semibold text-[10px] text-muted-foreground mb-1.5 flex items-center gap-1.5 uppercase tracking-wider">
                       <FileText className="h-3.5 w-3.5" /> Observations
                     </span>
-                    <p className="text-xs bg-muted/40 p-3 rounded-lg text-foreground/90 whitespace-pre-wrap leading-relaxed">
+                    <p className="text-xs bg-muted/40 p-3.5 rounded-xl text-foreground/90 whitespace-pre-wrap leading-relaxed">
                       {selectedEvent.notes}
                     </p>
                   </div>
                 )}
 
-                <div className="flex gap-2 pt-4 border-t border-muted">
+                {/* Actions */}
+                <div className="flex gap-3 pt-5 border-t border-muted">
                   <Button 
                     onClick={() => openEditForm(selectedEvent)}
                     variant="outline" 
-                    className="flex-1 gap-1 text-xs h-8"
+                    className="flex-1 gap-1.5 text-xs h-9"
                   >
-                    <Edit className="h-3.5 w-3.5" /> Modifier
+                    <Edit className="h-4 w-4" /> Modifier
                   </Button>
                   <Button 
                     onClick={() => handleDelete(selectedEvent.id)}
                     variant="destructive" 
-                    className="flex-1 gap-1 text-xs h-8"
+                    className="flex-1 gap-1.5 text-xs h-9"
                   >
-                    <Trash2 className="h-3.5 w-3.5" /> Supprimer
+                    <Trash2 className="h-4 w-4" /> Supprimer
                   </Button>
                 </div>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="hidden lg:block rounded-xl border border-dashed p-8 text-center text-muted-foreground bg-muted/10">
-              <CalendarIcon className="h-7 w-7 mx-auto mb-2 text-muted-foreground/40" />
-              <p className="text-xs">Sélectionnez un événement pour voir ses détails ou cliquez sur un créneau vide pour l'ajouter.</p>
+              </div>
             </div>
           )}
-        </div>
-      </div>
+        </SheetContent>
+      </Sheet>
 
-      {/* Formulaire Modal */}
-      {isFormOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm transition-all duration-200">
-          <Card className="w-full max-w-md shadow-2xl border-primary/20 bg-card overflow-hidden">
-            <div className="bg-primary/5 px-5 py-3.5 border-b border-muted flex items-center justify-between">
-              <h3 className="font-bold text-foreground">
-                {editingEvent ? 'Modifier l\'événement' : 'Nouvel événement'}
-              </h3>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={closeForm}
-                className="h-8 w-8 hover:bg-muted"
-              >
-                <X className="h-4 w-4" />
-              </Button>
+      {/* BOTTOM SHEET FORMULAIRE (shadcn-ui Sheet side="bottom") */}
+      <Sheet open={isFormOpen} onOpenChange={setIsFormOpen}>
+        <SheetContent side="bottom" className="w-full sm:max-w-lg mx-auto rounded-t-[24px] p-0 overflow-hidden border-t shadow-2xl bg-card">
+          <div className="flex flex-col h-full">
+            {/* Header */}
+            <div className="bg-primary/5 px-6 py-4 border-b border-muted">
+              <SheetHeader className="p-0 text-left">
+                <SheetTitle className="font-extrabold text-foreground text-base">
+                  {editingEvent ? 'Modifier l\'événement' : 'Nouvel événement'}
+                </SheetTitle>
+              </SheetHeader>
             </div>
 
-            <form onSubmit={handleSubmit(onSubmit)} className="p-5 space-y-4 max-h-[85vh] overflow-y-auto">
+            {/* Formulaire scrollable */}
+            <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-4 max-h-[70vh] overflow-y-auto pb-10">
               {formError && (
                 <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
                   {formError}
@@ -614,7 +604,7 @@ export default function Agenda() {
                 )}
               </div>
 
-              <div className="flex items-center gap-2 py-1">
+              <div className="flex items-center gap-2 py-1 select-none">
                 <input
                   id="all_day"
                   type="checkbox"
@@ -706,13 +696,13 @@ export default function Agenda() {
                   variant="outline" 
                   onClick={closeForm}
                   disabled={isSubmitting}
-                  className="h-8 text-xs"
+                  className="h-9 text-xs"
                 >
                   Annuler
                 </Button>
                 <Button 
                   type="submit" 
-                  className="bg-primary text-primary-foreground hover:bg-primary/95 flex items-center gap-1.5 h-8 text-xs"
+                  className="bg-primary text-primary-foreground hover:bg-primary/95 flex items-center gap-1.5 h-9 text-xs"
                   disabled={isSubmitting}
                 >
                   <Check className="h-3.5 w-3.5" />
@@ -720,9 +710,9 @@ export default function Agenda() {
                 </Button>
               </div>
             </form>
-          </Card>
-        </div>
-      )}
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
