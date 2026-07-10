@@ -77,18 +77,15 @@ Claude agit comme couche de validation et architecte de prompts entre l'utilisat
 
 ---
 
-## 4. Séquence de travail
+## 4. Workflow Git & Séquence de travail (mise à jour)
 
-1. Claude lit le code pertinent (via GitHub).
-2. Claude rédige un prompt précis et scopés pour Antigravity, incluant l'exigence d'un plan préalable.
-3. L'utilisateur envoie le prompt à Antigravity (Gemini).
-4. Antigravity présente un plan d'implémentation.
-5. L'utilisateur copie ce plan à Claude, qui le valide (ou demande des ajustements) avant tout codage.
-6. Antigravity code, une fois le plan validé.
-7. L'utilisateur teste en local (`node src/server.js`, tant qu'il n'y a pas de script `start`).
-8. L'utilisateur copie le résultat produit à Claude pour relecture.
-9. Push vers GitHub (`git push`, jamais `--force`).
-10. Déploiement (à préciser — pas encore d'hébergement de production confirmé).
+- **Branche de travail** : Toute la reconstruction de l'application (dossier `app/`) se fait exclusivement sur la branche `review/etat-actuel`, jamais directement sur `main`.
+- **Commits & Pushs réguliers** : L'agent (Antigravity/Gemini) effectue des commits et pushs réguliers sur cette branche au fur et à mesure du travail. Pas de validation bloquante nécessaire à chaque commit intermédiaire, contrairement aux anciennes versions.
+- **Validation avant intégration finale (main)** : La branche principale `main` ne sera mise à jour qu'une seule fois, lorsque :
+  1. Toutes les fonctionnalités de reconstruction seront finalisées et testées localement par David.
+  2. Claude aura relu le code final dans son ensemble.
+  3. David aura donné son accord et son autorisation explicite pour fusionner/pousser vers `main`.
+- **Schéma Supabase** : L'agent ne doit jamais modifier lui-même le schéma de base de données Supabase. Le SQL de migration doit toujours être fourni par Claude et exécuté manuellement par David.
 
 ---
 
