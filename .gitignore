@@ -1,3 +1,6 @@
 node_modules/
 .env
 database.json
+app/node_modules/
+app/dist/
+app/.env.local

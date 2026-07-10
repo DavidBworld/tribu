@@ -120,3 +120,54 @@ Claude agit comme couche de validation et architecte de prompts entre l'utilisat
 - Migration future vers Vite + Svelte/Vue : reportée tant que les bugs tactiles iOS ne sont pas définitivement réglés et confirmés sur device réel.
 
 *Dernière mise à jour de ce fichier : 05/07/2026, après audit direct du repo (clone + lecture de `server.js`, `package.json`, `public/index.html`).*
+
+---
+
+## 8. État actuel de la migration moderne (Supabase)
+
+### Stack technique du dossier `app/`
+- **Frontend** : Vite + React 18 + TS + Tailwind CSS v3 + shadcn-ui (Radix primitives).
+- **Routage** : React Router v6.
+- **Requêtes & Cache** : TanStack Query (React Query).
+- **Formulaires & Validation** : react-hook-form + zod.
+- **Backend & Auth** : Supabase.
+- Note : L'ancien code à la racine (`src/server.js`, `public/index.html`) est conservé comme filet de sécurité et référence fonctionnelle, mais il est totalement indépendant de `app/`.
+
+### Schéma de la base de données Supabase
+- **`families`** (table des familles) :
+  - `id` : uuid (Primary Key, default: `gen_random_uuid()`)
+  - `name` : text (nom de la famille)
+  - `created_at` : timestamptz (default: `now()`)
+- **`family_members`** (rattachement des utilisateurs aux familles) :
+  - `id` : uuid (Primary Key, default: `gen_random_uuid()`)
+  - `family_id` : uuid (Foreign Key references `families(id)`)
+  - `user_id` : uuid (Foreign Key references `auth.users(id)`)
+  - `role` : text (default: `'member'`, values: `'admin'` | `'member'`)
+  - `created_at` : timestamptz (default: `now()`)
+  - contrainte unique sur `(family_id, user_id)`
+- **`agenda_events`** (événements du calendrier familial) :
+  - `id` : uuid (Primary Key, default: `gen_random_uuid()`)
+  - `family_id` : uuid (Foreign Key references `families(id)`)
+  - `title` : text (titre de l'événement, obligatoire)
+  - `event_date` : date (date de l'événement, au format `YYYY-MM-DD`)
+  - `all_day` : boolean (vrai si l'événement dure toute la journée)
+  - `start_time` : text (heure de début, optionnelle, ex: `"10:30"`)
+  - `end_time` : text (heure de fin, optionnelle, ex: `"13:00"`)
+  - `location` : text (lieu de l'événement, optionnel)
+  - `phone` : text (téléphone, optionnel)
+  - `notes` : text (notes / observations, optionnel)
+  - `assigned_member_id` : uuid (Foreign Key references `family_members(id)`, optionnel, désigne le membre assigné)
+  - `created_by` : uuid (Foreign Key references `auth.users(id)`)
+  - `created_at` : timestamptz (default: `now()`)
+  - `updated_at` : timestamptz (default: `now()`)
+
+### RLS (Row Level Security)
+Toutes les tables possèdent le RLS activé. La sécurité repose sur l'appartenance à la famille connectée via la fonction SQL `is_member_of_family(family_id)`. Un utilisateur ne peut lire ou modifier que les lignes associées à son `family_id`.
+
+### Suivi des chantiers
+- **Chantier 1 (Terminé)** : Initialisation, configuration de l'import alias `@/`, shadcn-ui, Supabase Auth (Login/Signup), AuthGuard, et onboarding de famille (créer / rejoindre).
+- **Chantier 2 (En cours)** : Migration de l'Agenda (liste chronologique d'événements, CRUD, assignation de membres, formulaires typés Zod).
+
+### Règle d'or
+**Avant toute question ou script de diagnostic sur le schéma de la base de données, relire impérativement `AGENTS.md`.** Ce fichier contient la structure à jour des tables et colonnes.
+
