@@ -3,12 +3,12 @@ import { supabase } from '@/lib/supabase';
 export interface RecipeIngredient {
   qty?: string;
   unit?: string;
-  name: string;
+  name?: string;
 }
 
 export interface RecipeStep {
   title?: string;
-  desc: string;
+  desc?: string;
   photo?: string | null;
 }
 
@@ -21,8 +21,8 @@ export interface Recipe {
   cook_time?: string | null;
   servings?: string | null;
   wine_pairing?: string | null;
-  ingredients: RecipeIngredient[];
-  steps: RecipeStep[];
+  ingredients?: RecipeIngredient[];
+  steps?: RecipeStep[];
   tags: string[];
   difficulty?: string | null;
   hero_image_url?: string | null;

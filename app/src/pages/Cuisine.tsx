@@ -48,16 +48,16 @@ const recipeFormSchema = z.object({
     z.object({
       qty: z.string().optional(),
       unit: z.string().optional(),
-      name: z.string().min(1, "Le nom de l'ingrédient est obligatoire"),
+      name: z.string().optional(),
     })
-  ).min(1, 'Il faut au moins 1 ingrédient'),
+  ).optional(),
   steps: z.array(
     z.object({
       title: z.string().optional(),
-      desc: z.string().min(1, "La description de l'étape est obligatoire"),
+      desc: z.string().optional(),
       photo: z.string().nullable().optional(),
     })
-  ).min(1, 'Il faut au moins 1 étape'),
+  ).optional(),
 });
 
 type RecipeFormValues = z.infer<typeof recipeFormSchema>;
